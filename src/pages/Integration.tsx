@@ -111,6 +111,14 @@ const Integration = () => {
               </div>
             </div>
           </div>
+
+          {/* Last Error Timestamp */}
+          <div className="border-t border-border pt-4 mt-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Last Error Timestamp</span>
+              <span className="font-medium">2024-01-15 14:32:18</span>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

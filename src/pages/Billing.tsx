@@ -9,7 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Download, CreditCard, Users, Package } from "lucide-react";
+import { Download, CreditCard, Users, Package, CheckCircle, XCircle } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 const invoices = [
   {
@@ -32,6 +41,12 @@ const invoices = [
   },
 ];
 
+const usageHistory = [
+  { month: "Nov", amount: 8124 },
+  { month: "Dec", amount: 7932 },
+  { month: "Jan", amount: 8467 },
+];
+
 const Billing = () => {
   return (
     <div className="space-y-6">
@@ -42,6 +57,43 @@ const Billing = () => {
           Manage your subscription and view usage details
         </p>
       </div>
+
+      {/* Active Subscriptions */}
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle>Active Subscriptions</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <CheckCircle className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <div className="font-semibold">Virtual Try-On Subscription</div>
+                <div className="text-sm text-muted-foreground">Photo-based try-on technology</div>
+              </div>
+            </div>
+            <Badge className="bg-success/10 text-success hover:bg-success/20">
+              Active
+            </Badge>
+          </div>
+          <div className="flex items-center justify-between p-4 rounded-lg border border-border">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <CheckCircle className="h-5 w-5 text-success" />
+              </div>
+              <div>
+                <div className="font-semibold">Virtual Dressing Room Subscription</div>
+                <div className="text-sm text-muted-foreground">3D garment visualization</div>
+              </div>
+            </div>
+            <Badge className="bg-success/10 text-success hover:bg-success/20">
+              Active
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Account Summary */}
       <Card className="shadow-card">
@@ -103,7 +155,7 @@ const Billing = () => {
         <CardHeader>
           <CardTitle>Usage Overview</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
             <div>
               <div className="text-sm text-muted-foreground mb-1">
@@ -135,6 +187,35 @@ const Billing = () => {
                 +6.7% vs prior month
               </div>
             </div>
+          </div>
+
+          {/* Usage History Chart */}
+          <div className="pt-4 border-t border-border">
+            <h3 className="text-sm font-semibold mb-4">Last 3 Months</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={usageHistory}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis
+                  dataKey="month"
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "8px",
+                  }}
+                  formatter={(value) => [`${value} DKK`, "Amount"]}
+                />
+                <Bar
+                  dataKey="amount"
+                  fill="hsl(var(--primary))"
+                  radius={[8, 8, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>

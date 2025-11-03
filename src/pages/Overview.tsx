@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router-dom";
 import { MetricCard } from "@/components/dashboard/MetricCard";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Upload, TrendingUp, TrendingDown, ShoppingBag, Package } from "lucide-react";
+import { Eye, TrendingUp, TrendingDown, Package } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -20,10 +20,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { DateRange } from "react-day-picker";
 
 interface ContextType {
   productFilter: "all" | "vto" | "vdr";
-  dateRange: "7" | "30" | "custom";
+  dateRange: DateRange | undefined;
 }
 
 const mockChartData = [
@@ -37,36 +38,41 @@ const mockProducts = [
   {
     id: 1,
     name: "Summer Dress Blue",
-    category: "Dresses",
+    type: "VTO",
     tryOns: 1234,
+    conversionRate: 32.4,
     image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=100&h=100&fit=crop",
   },
   {
     id: 2,
     name: "Classic Blazer",
-    category: "Outerwear",
+    type: "VDR",
     tryOns: 987,
+    conversionRate: 28.1,
     image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=100&h=100&fit=crop",
   },
   {
     id: 3,
     name: "Denim Jeans",
-    category: "Bottoms",
+    type: "VTO",
     tryOns: 856,
+    conversionRate: 24.7,
     image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=100&h=100&fit=crop",
   },
   {
     id: 4,
     name: "White Sneakers",
-    category: "Footwear",
+    type: "VDR",
     tryOns: 743,
+    conversionRate: 35.2,
     image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=100&h=100&fit=crop",
   },
   {
     id: 5,
     name: "Leather Jacket",
-    category: "Outerwear",
+    type: "VTO",
     tryOns: 621,
+    conversionRate: 29.8,
     image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=100&h=100&fit=crop",
   },
 ];
@@ -89,29 +95,32 @@ const Overview = () => {
         <MetricCard
           title="Total Try-Ons"
           value="12,543"
-          subtitle="Last 30 days"
+          subtitle="Selected period"
+          icon={Eye}
+          tooltip="Total number of virtual try-on sessions across all products in the selected date range"
+        />
+        <MetricCard
+          title="Conversion Rate"
+          value="24.3%"
+          subtitle="+12.5% vs baseline before UTRY"
           icon={TrendingUp}
           trend={{ value: 12.5, isPositive: true }}
+          tooltip="Percentage of try-on sessions that resulted in a purchase, compared to your baseline before using UTRY"
         />
         <MetricCard
-          title="Conversion Lift"
-          value="24.3%"
-          subtitle="vs non-VTO products"
-          icon={ShoppingBag}
-          trend={{ value: 3.2, isPositive: true }}
-        />
-        <MetricCard
-          title="Return Rate Reduction"
-          value="-18.7%"
-          subtitle="Compared to baseline"
+          title="Return Rate"
+          value="18.7%"
+          subtitle="-8.2% vs baseline before UTRY"
           icon={TrendingDown}
-          trend={{ value: 2.4, isPositive: true }}
+          trend={{ value: 8.2, isPositive: true }}
+          tooltip="Percentage of purchases that were returned, showing the reduction compared to your baseline before UTRY"
         />
         <MetricCard
           title="Active Products"
           value="247"
           subtitle="VTO + VDR combined"
           icon={Package}
+          tooltip="Total number of products currently available for virtual try-on across both VTO and VDR"
         />
       </div>
 
@@ -151,20 +160,17 @@ const Overview = () => {
 
       {/* Top Products Table */}
       <Card className="shadow-card">
-        <CardHeader className="flex flex-row items-center justify-between">
+        <CardHeader>
           <CardTitle>Top 5 Products</CardTitle>
-          <Button className="bg-secondary hover:bg-secondary/90">
-            <Upload className="h-4 w-4 mr-2" />
-            Upload New Product
-          </Button>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Product</TableHead>
-                <TableHead>Category</TableHead>
+                <TableHead>Type</TableHead>
                 <TableHead className="text-right">Try-Ons</TableHead>
+                <TableHead className="text-right">Conversion Rate</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -180,11 +186,23 @@ const Overview = () => {
                       <span className="font-medium">{product.name}</span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {product.category}
+                  <TableCell>
+                    <Badge
+                      variant="secondary"
+                      className={
+                        product.type === "VTO"
+                          ? "bg-primary/10 text-primary"
+                          : "bg-secondary/10 text-secondary"
+                      }
+                    >
+                      {product.type}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-right font-medium">
                     {product.tryOns.toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    {product.conversionRate}%
                   </TableCell>
                 </TableRow>
               ))}

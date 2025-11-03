@@ -7,7 +7,6 @@ import { DashboardLayout } from "./components/layout/DashboardLayout";
 import Overview from "./pages/Overview";
 import VTO from "./pages/VTO";
 import VDR from "./pages/VDR";
-import Analytics from "./pages/Analytics";
 import Integration from "./pages/Integration";
 import Billing from "./pages/Billing";
 import NotFound from "./pages/NotFound";
@@ -25,7 +24,6 @@ const App = () => (
             <Route path="/" element={<Overview />} />
             <Route path="/vto" element={<VTO />} />
             <Route path="/vdr" element={<VDR />} />
-            <Route path="/analytics" element={<Analytics />} />
             <Route path="/integration" element={<Integration />} />
             <Route path="/billing" element={<Billing />} />
           </Route>

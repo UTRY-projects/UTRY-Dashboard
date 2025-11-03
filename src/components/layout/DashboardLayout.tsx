@@ -3,10 +3,14 @@ import { Outlet } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "./DashboardSidebar";
 import { DashboardHeader } from "./DashboardHeader";
+import { DateRange } from "react-day-picker";
 
 export const DashboardLayout = () => {
   const [productFilter, setProductFilter] = useState<"all" | "vto" | "vdr">("all");
-  const [dateRange, setDateRange] = useState<"7" | "30" | "custom">("30");
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(new Date().setDate(new Date().getDate() - 30)),
+    to: new Date(),
+  });
 
   return (
     <SidebarProvider>

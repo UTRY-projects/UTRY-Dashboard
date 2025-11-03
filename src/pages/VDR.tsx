@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Upload, Users, Box } from "lucide-react";
+import { Send, Eye, TrendingUp, TrendingDown, Users } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -36,6 +36,7 @@ const mockVDRProducts = [
     id: 1,
     name: "Denim Jacket 3D",
     tryOns: 856,
+    conversionRate: 28.3,
     integrationStatus: "connected",
     fileStatus: "live",
     image: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=100&h=100&fit=crop",
@@ -44,6 +45,7 @@ const mockVDRProducts = [
     id: 2,
     name: "White T-Shirt Basic",
     tryOns: 743,
+    conversionRate: 31.2,
     integrationStatus: "connected",
     fileStatus: "live",
     image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop",
@@ -52,6 +54,7 @@ const mockVDRProducts = [
     id: 3,
     name: "Cargo Pants Olive",
     tryOns: 0,
+    conversionRate: 0,
     integrationStatus: "processing",
     fileStatus: "pending",
     image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=100&h=100&fit=crop",
@@ -66,30 +69,47 @@ const VDR = () => {
         <div>
           <h1 className="text-3xl font-bold text-foreground">Virtual Dressing Room</h1>
           <p className="text-muted-foreground mt-1">
-            Manage 3D garments and track avatar engagement
+            3D garment analytics and avatar engagement metrics
           </p>
         </div>
         <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
-          <Upload className="h-4 w-4 mr-2" />
-          Upload 3D Garment
+          <Send className="h-4 w-4 mr-2" />
+          Send UTRY New Design
         </Button>
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
-          title="Active Avatars"
+          title="Total VDR Try-Ons"
           value="3,996"
-          subtitle="Created in last 30 days"
-          icon={Users}
+          subtitle="Selected period"
+          icon={Eye}
           trend={{ value: 8.2, isPositive: true }}
+          tooltip="Total number of 3D garment try-ons using virtual avatars in the selected date range"
         />
         <MetricCard
-          title="Avg. Try-Ons per User"
-          value="4.7"
-          subtitle="Per VDR session"
-          icon={Box}
-          trend={{ value: 0.3, isPositive: true }}
+          title="Conversion Rate"
+          value="29.1%"
+          subtitle="+11.3% vs baseline before UTRY"
+          icon={TrendingUp}
+          trend={{ value: 11.3, isPositive: true }}
+          tooltip="Percentage of VDR sessions that resulted in purchases, compared to baseline before using UTRY"
+        />
+        <MetricCard
+          title="Return Rate"
+          value="14.2%"
+          subtitle="-7.8% vs baseline before UTRY"
+          icon={TrendingDown}
+          trend={{ value: 7.8, isPositive: true }}
+          tooltip="Percentage of VDR purchases that were returned, showing reduction from baseline"
+        />
+        <MetricCard
+          title="Unique Users"
+          value="681"
+          subtitle="Selected period"
+          icon={Users}
+          tooltip="Number of distinct users who used VDR in the selected date range"
         />
       </div>
 
@@ -138,6 +158,7 @@ const VDR = () => {
               <TableRow>
                 <TableHead>Product</TableHead>
                 <TableHead className="text-right">Try-Ons</TableHead>
+                <TableHead className="text-right">Conversion Rate</TableHead>
                 <TableHead className="text-right">Integration</TableHead>
                 <TableHead className="text-right">File Status</TableHead>
               </TableRow>
@@ -157,6 +178,9 @@ const VDR = () => {
                   </TableCell>
                   <TableCell className="text-right font-medium">
                     {product.tryOns > 0 ? product.tryOns.toLocaleString() : "—"}
+                  </TableCell>
+                  <TableCell className="text-right font-medium">
+                    {product.conversionRate > 0 ? `${product.conversionRate}%` : "—"}
                   </TableCell>
                   <TableCell className="text-right">
                     <Badge

@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,13 +6,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, User, Settings, LogOut } from "lucide-react";
+import { Calendar as CalendarIcon, User, Settings, LogOut } from "lucide-react";
+import { DateRange } from "react-day-picker";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface DashboardHeaderProps {
   productFilter: "all" | "vto" | "vdr";
   setProductFilter: (filter: "all" | "vto" | "vdr") => void;
-  dateRange: "7" | "30" | "custom";
-  setDateRange: (range: "7" | "30" | "custom") => void;
+  dateRange: DateRange | undefined;
+  setDateRange: (range: DateRange | undefined) => void;
 }
 
 export const DashboardHeader = ({
@@ -25,7 +29,7 @@ export const DashboardHeader = ({
   return (
     <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6 shadow-card">
       <div className="flex items-center gap-4">
-        <SidebarTrigger />
+        <h2 className="font-semibold text-lg text-foreground">Analytics Dashboard</h2>
       </div>
 
       <div className="flex items-center gap-4">
@@ -57,33 +61,43 @@ export const DashboardHeader = ({
           </Button>
         </div>
 
-        {/* Date Range Filter */}
-        <div className="flex items-center gap-2 bg-muted rounded-lg p-1">
-          <Button
-            variant={dateRange === "7" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setDateRange("7")}
-            className="h-8 px-4"
-          >
-            7 days
-          </Button>
-          <Button
-            variant={dateRange === "30" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setDateRange("30")}
-            className="h-8 px-4"
-          >
-            30 days
-          </Button>
-          <Button
-            variant={dateRange === "custom" ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setDateRange("custom")}
-            className="h-8 px-4"
-          >
-            <Calendar className="h-4 w-4" />
-          </Button>
-        </div>
+        {/* Date Range Picker */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "h-9 px-4 justify-start text-left font-normal",
+                !dateRange && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateRange?.from ? (
+                dateRange.to ? (
+                  <>
+                    {format(dateRange.from, "LLL dd, y")} -{" "}
+                    {format(dateRange.to, "LLL dd, y")}
+                  </>
+                ) : (
+                  format(dateRange.from, "LLL dd, y")
+                )
+              ) : (
+                <span>Pick a date range</span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="end">
+            <Calendar
+              initialFocus
+              mode="range"
+              defaultMonth={dateRange?.from}
+              selected={dateRange}
+              onSelect={setDateRange}
+              numberOfMonths={2}
+              className="pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
 
         {/* User Menu */}
         <DropdownMenu>
