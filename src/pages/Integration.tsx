@@ -36,11 +36,11 @@ const Integration = () => {
   const deepLinkUrl = useMemo(() => {
     const host = new URLSearchParams(window.location.search).get('host')
     const shop = new URLSearchParams(window.location.search).get('shop')
+    console.log("click");
     if(!host){
       return '';
     }
-    const shopDomain = "https://utry-merch-store.myshopify.com";
-        //atob(host);
+    const shopDomain = atob(host);
     return `https://${shopDomain}/admin/themes/current/editor?template=product&addAppBlockId=
             ${YOUR_APP_API_KEY}/${YOUR_THEME_BLOCK_HANDLE}&target=mainSection`;
   }, []);
@@ -61,13 +61,11 @@ const Integration = () => {
           <CardHeader>
             <CardTitle>Integration</CardTitle>
             <p>With the inegration the app will be embeded into product pages. Click button below to start Integration</p>
+            <div className="flex gap-4 mt">
+              <Button url={deepLinkUrl} external> Integrate </Button>
+              <Button> Contact Support </Button>
+            </div>
 
-            <Button fullWidth icon={RefreshCw}>
-                Integrate
-              </Button>
-              <Button fullWidth icon={HelpCircle}>
-                Contact Support
-              </Button>
           </CardHeader>
         </CardContent>
 
