@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+// import { Button as ShadcnButton } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -10,6 +10,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { RefreshCw, AlertCircle, CheckCircle, HelpCircle } from "lucide-react";
+import { useMemo } from 'react';
+import { Button } from '@shopify/polaris';
+
+const YOUR_APP_API_KEY = '6feca39509df11b363bb0a7300580b2f'
+const YOUR_THEME_BLOCK_HANDLE = 'customer_review';
+
 
 const errorLogs = [
   {
@@ -27,6 +33,17 @@ const errorLogs = [
 ];
 
 const Integration = () => {
+  const deepLinkUrl = useMemo(() => {
+    const host = new URLSearchParams(window.location.search).get('host')
+    const shop = new URLSearchParams(window.location.search).get('shop')
+    if(!host){
+      return '';
+    }
+    const shopDomain = "https://utry-merch-store.myshopify.com";
+        //atob(host);
+    return `https://${shopDomain}/admin/themes/current/editor?template=product&addAppBlockId=
+            ${YOUR_APP_API_KEY}/${YOUR_THEME_BLOCK_HANDLE}&target=mainSection`;
+  }, []);
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -36,6 +53,27 @@ const Integration = () => {
           Monitor connection status and system health
         </p>
       </div>
+
+      {/* Theme Setup Card */}
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle>Theme Setup</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>
+            To complete the setup, add our app's block on your product page.
+            This will enable our features directly on your store.
+          </p>
+          <Button
+            variant="primary"
+            url={deepLinkUrl}
+            target="_top"
+            disabled={!deepLinkUrl}
+            >
+            Add App Block to Product Page
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Integration Status Card */}
       <Card className="shadow-card">
@@ -73,12 +111,10 @@ const Integration = () => {
             </div>
 
             <div className="flex flex-col justify-center gap-3">
-              <Button variant="outline" className="w-full">
-                <RefreshCw className="h-4 w-4 mr-2" />
+              <Button fullWidth icon={RefreshCw}>
                 Sync Now
               </Button>
-              <Button variant="outline" className="w-full">
-                <HelpCircle className="h-4 w-4 mr-2" />
+              <Button fullWidth icon={HelpCircle}>
                 Contact Support
               </Button>
             </div>
