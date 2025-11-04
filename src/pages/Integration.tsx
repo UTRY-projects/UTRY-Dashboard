@@ -12,8 +12,10 @@ import {
 import { RefreshCw, AlertCircle, CheckCircle, HelpCircle } from "lucide-react";
 import { useMemo } from 'react';
 import { Button } from '@shopify/polaris';
+import { useSearchParams } from "react-router-dom";
 
-const YOUR_APP_API_KEY = '6feca39509df11b363bb0a7300580b2f'
+
+const YOUR_APP_API_KEY = '6feca363bb0a7300580b2f9509df11b3'
 const YOUR_THEME_BLOCK_HANDLE = 'customer_review';
 
 
@@ -33,17 +35,18 @@ const errorLogs = [
 ];
 
 const Integration = () => {
+  const api_key = '6feca363bb0a7300580b2f9509df11b3'
+  const [searchParams] = useSearchParams();
   const deepLinkUrl = useMemo(() => {
-    const host = new URLSearchParams(window.location.search).get('host')
-    const shop = new URLSearchParams(window.location.search).get('shop')
-    console.log("click");
+    const host = searchParams.get('host')
+    const shop = searchParams.get('shop')
     if(!host){
       return '';
     }
     const shopDomain = atob(host);
-    return `https://${shopDomain}/admin/themes/current/editor?template=product&addAppBlockId=
-            ${YOUR_APP_API_KEY}/${YOUR_THEME_BLOCK_HANDLE}&target=mainSection`;
-  }, []);
+    return `https://${shopDomain}/admin/themes/current/editor?template=product&addAppBlockId=${api_key}&target=newAppsSection`;
+
+  }, [searchParams]);
   return (
     <div className="space-y-6">
       {/* Page Header */}

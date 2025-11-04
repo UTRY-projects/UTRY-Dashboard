@@ -17,15 +17,15 @@ const AppContent = () => {
   const [searchParams] = useSearchParams();
   const host = searchParams.get("host");
 
-  if(!host){
-    return (
-        <div style={{ padding: "2rem", textAlign: "center", fontFamily: "sans-serif", color: "#333" }}>
-          <h1 style={{ fontSize: "1.5rem", fontWeight: "600" }}>UTRY Dashboard</h1>
-          <p style={{ marginTop: "1rem" }}>This application is designed to be embedded within the Shopify Admin.</p>
-          <p style={{ marginTop: "0.5rem" }}>To view your dashboard, please open the app from your Shopify store's "Apps" section.</p>
-        </div>
-    );
-  }
+  // if(!host){
+  //   return (
+  //       <div style={{ padding: "2rem", textAlign: "center", fontFamily: "sans-serif", color: "#333" }}>
+  //         <h1 style={{ fontSize: "1.5rem", fontWeight: "600" }}>UTRY Dashboard</h1>
+  //         <p style={{ marginTop: "1rem" }}>This application is designed to be embedded within the Shopify Admin.</p>
+  //         <p style={{ marginTop: "0.5rem" }}>To view your dashboard, please open the app from your Shopify store's "Apps" section.</p>
+  //       </div>
+  //   );
+  // }
 
   return (
       <Routes>
