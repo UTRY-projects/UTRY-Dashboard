@@ -26,7 +26,7 @@ const menuItems = [
   { title: "Virtual Try-On", url: "/vto", icon: Camera },
   { title: "Virtual Dressing Room", url: "/vdr", icon: Shirt },
   { title: "Integration Health", url: "/integration", icon: Link2 },
-  { title: "Account & Billing", url: "/billing", icon: CreditCard },
+  { title: "Subscription & Billing", url: "/billing", icon: CreditCard },
 ];
 
 export const DashboardSidebar = ({ productFilter }: DashboardSidebarProps) => {
