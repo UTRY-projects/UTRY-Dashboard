@@ -52,11 +52,70 @@ const Billing = () => {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Account & Billing</h1>
+        <h1 className="text-3xl font-bold text-foreground">Subscription & Billing</h1>
         <p className="text-muted-foreground mt-1">
           Manage your subscription and view usage details
         </p>
       </div>
+
+      <Card className="shadow-card">
+        <CardHeader>
+          <CardTitle>Subscription plans</CardTitle>
+           </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 rounded-lg border border-border">
+                <div className="text-sm text-muted-foreground mb-1">
+                  Starter
+                </div>
+                Subscription price/month:
+                <div className="text-xl font-bold pb-4">$600</div>
+                <p className="text-sm">Subscription includes:</p>
+                <div className="text-m"> Free usages: <strong>3500</strong></div>
+                <div className="text-m pb-4">Free garments: <strong>5</strong></div>
+                <p className="text-sm">Integration price</p>
+                <div className="text-m font-bold pb-4">$800</div>
+                <p>Price per additional *usages</p>
+                <div className="text-m"> <strong>$0.22</strong> / 24 hours</div>
+                <p className="text-sm pb-4">*usage: unique user/24 hours</p>
+                <p>price per additional garment</p>
+                <div className="text-m"> <strong>$150</strong> / garment</div>
+
+              </div>
+              <div className="p-4 rounded-lg border border-border">
+                <div className="text-sm text-muted-foreground mb-1">
+                  Growth
+                </div>
+                Subscription price/month:
+                <div className="text-xl font-bold pb-4">$1159</div>
+                <p className="text-sm">Subscription includes:</p>
+                <div className="text-m"> Free usages: <strong>8500</strong></div>
+                <div className="text-m pb-4">Free garments: <strong>15</strong></div>
+                <p className="text-sm">Integration price</p>
+                <div className="text-m font-bold pb-4">$1500</div>
+                <p>Price per additional *usages</p>
+                <div className="text-m"> <strong>$0.19</strong> / 24 hours</div>
+                <p className="text-sm pb-4">*usage: unique user/24 hours</p>
+                <p>price per additional garment</p>
+                <div className="text-m"> <strong>$120</strong> / garment</div>
+              </div>
+              <div className="p-4 rounded-lg border border-border">
+                <div className="text-sm text-muted-foreground mb-1">
+                  Enterprise
+                </div>
+                <div className="text-xl font-bold">Custom pricing</div>
+                <p className="pb-4">Contact UTRY</p>
+                <p className="text-sm">bennefits:</p>
+                <ul className="list-disc pl-4">
+                  <li>Specifik usage price</li>
+                  <li>Low subscription cost</li>
+                  <li>Extra garments</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+      </Card>
+
 
       {/* Active Subscriptions */}
       <Card className="shadow-card">

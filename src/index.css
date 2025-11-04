@@ -7,6 +7,11 @@ All colors MUST be HSL.
 */
 
 @layer base {
+
+li{
+  line-height: 3rem;
+}
+
   :root {
     /* UTRY Brand Colors */
     --background: 220 100% 98%;
