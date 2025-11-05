@@ -14,7 +14,6 @@ import NotFound from "./pages/NotFound";
 import { useState, useEffect } from "react";
 
 const queryClient = new QueryClient();
-const isGhPages = typeof location !== "undefined" && location.hostname.endsWith("github.io");
 
 const ShopifyParamWatcher = ({ children }) => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -47,44 +46,29 @@ const ShopifyParamWatcher = ({ children }) => {
     return paramsReady ? <>{children}</> : null;
 };
 
-const AppContent = () => {
-    const Router = isGhPages ? HashRouter : BrowserRouter;
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <TooltipProvider>
-                <Router>
-                    <Routes>
-                        <Route element={<DashboardLayout />}>
-                            <Route path="/" element={<Overview />} />
-                            <Route path="/vto" element={<VTO />} />
-                            <Route path="/vdr" element={<VDR />} />
-                            <Route path="/integration" element={<Integration />} />
-                            <Route path="/billing" element={<Billing />} />
-                        </Route>
-                        <Route path="*" element={<NotFound />} />
-                    </Routes>
-                </Router>
-                <Toaster />
-                <Sonner />
-            </TooltipProvider>
-        </QueryClientProvider>
-    );
-};
-
+const AppContent = () => (
+    <Routes>
+        <Route element={<DashboardLayout />}>
+            <Route path="/" element={<Overview />} />
+            <Route path="/vto" element={<VTO />} />
+            <Route path="/vdr" element={<VDR />} />
+            <Route path="/integration" element={<Integration />} />
+            <Route path="/billing" element={<Billing />} />
+        </Route>
+        <Route path="*" element={<NotFound />} />
+    </Routes>
+);
 
 const App = () => (
-
-
     <QueryClientProvider client={queryClient}>
         <TooltipProvider>
             <Toaster />
             <Sonner />
-            <BrowserRouter>
+            <HashRouter>
                 <ShopifyParamWatcher>
                     <AppContent />
                 </ShopifyParamWatcher>
-            </BrowserRouter>
+            </HashRouter>
         </TooltipProvider>
     </QueryClientProvider>
 );
