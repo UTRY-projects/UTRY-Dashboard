@@ -50,9 +50,11 @@ const Integration = () => {
     }
     return (
         <div>
-          <h1>Missing Shopify context</h1>
           <p>
             Please reload the page to view the content(This is due to a shopify limitation that this page won't load propperly until you reload this page).
+          </p>
+          <p>
+            <strong>Press F5 or CTRL+R to reload the page.</strong>
           </p>
         </div>
     );

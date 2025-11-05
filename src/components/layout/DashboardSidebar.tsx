@@ -25,7 +25,7 @@ const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Virtual Try-On", url: "/vto", icon: Camera },
   { title: "Virtual Dressing Room", url: "/vdr", icon: Shirt },
-  { title: "Integration Health", url: "/integration", icon: Link2 },
+  { title: "Integrate with Shopify & Integration health", url: "/integration", icon: Link2 },
   { title: "Subscription & Billing", url: "/billing", icon: CreditCard },
 ];
 
@@ -52,20 +52,25 @@ export const DashboardSidebar = ({ productFilter }: DashboardSidebarProps) => {
                 })
                 .map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton
+                        asChild
+                        className="!h-auto !min-h-10 !whitespace-normal !overflow-visible"
+                    >
                       <NavLink
                         to={item.url}
                         end={item.url === "/"}
                         className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                          `flex items-start gap-3 px-4 py-3 w-full rounded-lg transition-colors text-left !h-auto !min-h-10 !whitespace-normal !overflow-visible ${
                             isActive
                               ? "bg-primary/10 text-primary font-medium"
                               : "text-muted-foreground hover:bg-muted hover:text-foreground"
                           }`
                         }
                       >
-                        <item.icon className="h-5 w-5" />
-                        <span>{item.title}</span>
+                        <item.icon className="h-5 w-5 shrink-0 self-start" />
+                        <span className="block flex-1 min-w-0 whitespace-normal break-words [overflow-wrap:anywhere] leading-snug"
+                              style={{ whiteSpace: "normal" }}
+                        >{item.title}</span>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
