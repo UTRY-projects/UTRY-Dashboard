@@ -66,7 +66,10 @@ const AppContent = () => {
     );
 };
 
+const baseName = import.meta.env.BASE_URL;
+
 const App = () => (
+    <BrowserRouter basename={baseName}>
     <QueryClientProvider client={queryClient}>
         <TooltipProvider>
             <Toaster />
@@ -78,6 +81,7 @@ const App = () => (
             </BrowserRouter>
         </TooltipProvider>
     </QueryClientProvider>
+    </BrowserRouter>
 );
 
 export default App;
