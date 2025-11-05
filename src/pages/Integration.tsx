@@ -1,23 +1,12 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Button as ShadcnButton } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { RefreshCw, AlertCircle, CheckCircle, HelpCircle } from "lucide-react";
-import { useMemo } from 'react';
-import { Button } from '@shopify/polaris';
+import React, { useMemo, useEffect } from "react";
+import createApp from "@shopify/app-bridge";
+import { Redirect } from "@shopify/app-bridge/actions";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useSearchParams } from "react-router-dom";
 
-
-const YOUR_APP_API_KEY = '6feca363bb0a7300580b2f9509df11b3'
-const YOUR_THEME_BLOCK_HANDLE = 'customer_review';
-
+const apiKey = "6feca39509df11b363bb0a7300580b2f";
+const blockHandle = "utry-button";
 
 const errorLogs = [
   {
@@ -35,18 +24,47 @@ const errorLogs = [
 ];
 
 const Integration = () => {
-  const api_key = '6feca363bb0a7300580b2f9509df11b3'
-  const [searchParams] = useSearchParams();
-  const deepLinkUrl = useMemo(() => {
-    const host = searchParams.get('host')
-    const shop = searchParams.get('shop')
-    if(!host){
-      return '';
-    }
-    const shopDomain = atob(host);
-    return `https://${shopDomain}/admin/themes/current/editor?template=product&addAppBlockId=${api_key}&target=newAppsSection`;
 
-  }, [searchParams]);
+  const [searchParams] = useSearchParams();
+  const host = searchParams.get("host");
+  const shop = searchParams.get("shop");
+
+  // Always call useMemo, but only create the app if host is present
+  const app = React.useMemo(() => {
+    if (!host) return null;
+    return createApp({
+      apiKey,
+      host,
+      forceRedirect: true,
+    });
+  }, [host]);
+
+  // Early return for missing params, but after all hooks
+  if (!host || !shop) {
+    // Avoid infinite reloads by checking if we've already tried to reload
+    if (!window.location.search.includes("reloaded=1")) {
+      const params = new URLSearchParams(window.location.search);
+      params.set("reloaded", "1");
+      window.location.search = params.toString();
+      return null;
+    }
+    return (
+        <div>
+          <h1>Missing Shopify context</h1>
+          <p>
+            Please reload the page to view the content(This is due to a shopify limitation that this page won't load propperly until you reload this page).
+          </p>
+        </div>
+    );
+  }
+
+  const handleIntegrateClick = () => {
+    if (!app) return;
+    const url = `/admin/themes/current/editor?template=product&addAppBlockId=${apiKey}/${blockHandle}&target=newAppsSection`;
+    const redirect = Redirect.create(app);
+    redirect.dispatch(Redirect.Action.ADMIN_PATH, url);
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -65,7 +83,7 @@ const Integration = () => {
             <CardTitle>Integration</CardTitle>
             <p>With the inegration the app will be embeded into product pages. Click button below to start Integration</p>
             <div className="flex gap-4 mt">
-              <Button url={deepLinkUrl} external> Integrate </Button>
+              <Button onClick={handleIntegrateClick}> Integrate </Button>
               <Button> Contact Support </Button>
             </div>
 

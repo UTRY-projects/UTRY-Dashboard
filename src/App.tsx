@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useSearchParams } from "react-router-dom";
+import { useAppBridge } from "@shopify/app-bridge-react";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 import Overview from "./pages/Overview";
 import VTO from "./pages/VTO";
@@ -10,50 +11,73 @@ import VDR from "./pages/VDR";
 import Integration from "./pages/Integration";
 import Billing from "./pages/Billing";
 import NotFound from "./pages/NotFound";
+import { useState, useEffect } from "react";
 
 const queryClient = new QueryClient();
 
+const ShopifyParamWatcher = ({ children }) => {
+    const [searchParams, setSearchParams] = useSearchParams();
+    const [paramsReady, setParamsReady] = useState(false);
+
+    useEffect(() => {
+        if (searchParams.has('shop')) {
+            setParamsReady(true);
+            return;
+        }
+
+        let attempts = 0;
+        const interval = setInterval(() => {
+            const currentUrlParams = new URLSearchParams(window.location.search);
+            attempts++;
+
+            if (currentUrlParams.has('shop')) {
+                clearInterval(interval);
+                setSearchParams(currentUrlParams, { replace: true });
+                setParamsReady(true);
+            } else if (attempts > 30) {
+                clearInterval(interval);
+                setParamsReady(true);
+            }
+        }, 100);
+
+        return () => clearInterval(interval);
+    }, [searchParams, setSearchParams]);
+
+    return paramsReady ? <>{children}</> : null;
+};
+
 const AppContent = () => {
-  const [searchParams] = useSearchParams();
-  const host = searchParams.get("host");
+    // You can use useAppBridge in any component that needs App Bridge features
+    // Example usage:
+    // const shopify = useAppBridge();
+    // shopify.toast.show('Hello from App Bridge!');
 
-  // if(!host){
-  //   return (
-  //       <div style={{ padding: "2rem", textAlign: "center", fontFamily: "sans-serif", color: "#333" }}>
-  //         <h1 style={{ fontSize: "1.5rem", fontWeight: "600" }}>UTRY Dashboard</h1>
-  //         <p style={{ marginTop: "1rem" }}>This application is designed to be embedded within the Shopify Admin.</p>
-  //         <p style={{ marginTop: "0.5rem" }}>To view your dashboard, please open the app from your Shopify store's "Apps" section.</p>
-  //       </div>
-  //   );
-  // }
-
-  return (
-      <Routes>
-        <Route element={<DashboardLayout />}>
-          <Route path="/" element={<Overview />} />
-          <Route path="/vto" element={<VTO />} />
-          <Route path="/vdr" element={<VDR />} />
-          <Route path="/integration" element={<Integration />} />
-          <Route path="/billing" element={<Billing />} />
-        </Route>
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-  );
-
-
-}
+    return (
+        <Routes>
+            <Route element={<DashboardLayout />}>
+                <Route path="/" element={<Overview />} />
+                <Route path="/vto" element={<VTO />} />
+                <Route path="/vdr" element={<VDR />} />
+                <Route path="/integration" element={<Integration />} />
+                <Route path="/billing" element={<Billing />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+        </Routes>
+    );
+};
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AppContent />
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+                <ShopifyParamWatcher>
+                    <AppContent />
+                </ShopifyParamWatcher>
+            </BrowserRouter>
+        </TooltipProvider>
+    </QueryClientProvider>
 );
 
 export default App;
