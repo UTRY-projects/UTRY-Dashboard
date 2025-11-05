@@ -5,7 +5,10 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: mode === "production" ? "/UTRY-Dashboard/" : "/",
+  base: "/UTRY-Dashboard",
+  build: {
+    sourcemap: true, // enable source maps for better stack traces in production
+  },
 
   server: {
     host: "::",

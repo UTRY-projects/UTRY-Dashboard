@@ -67,6 +67,8 @@ const AppContent = () => {
 };
 
 const baseName = import.meta.env.BASE_URL;
+(window as any).__BASE_URL__ = import.meta.env.BASE_URL;
+
 
 const App = () => (
     <BrowserRouter basename={baseName}>
