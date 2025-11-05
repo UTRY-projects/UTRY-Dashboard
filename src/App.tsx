@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useSearchParams } from "react-router-dom";
+import { BrowserRouter, Routes, Route, HashRouter, useSearchParams } from "react-router-dom";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 import Overview from "./pages/Overview";
@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 import { useState, useEffect } from "react";
 
 const queryClient = new QueryClient();
+const isGhPages = typeof location !== "undefined" && location.hostname.endsWith("github.io");
 
 const ShopifyParamWatcher = ({ children }) => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -51,8 +52,12 @@ const AppContent = () => {
     // Example usage:
     // const shopify = useAppBridge();
     // shopify.toast.show('Hello from App Bridge!');
-
+    const Router: React.FC<React.PropsWithChildren> = ({ children }) => {
+        const R = isGhPages ? HashRouter : BrowserRouter;
+        return <R>{children}</R>;
+    }
     return (
+        <Router>
         <Routes>
             <Route element={<DashboardLayout />}>
                 <Route path="/" element={<Overview />} />
@@ -63,15 +68,12 @@ const AppContent = () => {
             </Route>
             <Route path="*" element={<NotFound />} />
         </Routes>
+        </Router>
     );
 };
 
-const baseName = import.meta.env.BASE_URL;
-(window as any).__BASE_URL__ = import.meta.env.BASE_URL;
-
 
 const App = () => (
-    <BrowserRouter basename={baseName}>
     <QueryClientProvider client={queryClient}>
         <TooltipProvider>
             <Toaster />
@@ -83,7 +85,6 @@ const App = () => (
             </BrowserRouter>
         </TooltipProvider>
     </QueryClientProvider>
-    </BrowserRouter>
 );
 
 export default App;

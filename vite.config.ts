@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: "/UTRY-Dashboard",
+  base: "/UTRY-Dashboard/",
   build: {
     sourcemap: true, // enable source maps for better stack traces in production
   },
