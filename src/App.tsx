@@ -48,32 +48,34 @@ const ShopifyParamWatcher = ({ children }) => {
 };
 
 const AppContent = () => {
-    // You can use useAppBridge in any component that needs App Bridge features
-    // Example usage:
-    // const shopify = useAppBridge();
-    // shopify.toast.show('Hello from App Bridge!');
-    const Router: React.FC<React.PropsWithChildren> = ({ children }) => {
-        const R = isGhPages ? HashRouter : BrowserRouter;
-        return <R>{children}</R>;
-    }
+    const Router = isGhPages ? HashRouter : BrowserRouter;
+
     return (
-        <Router>
-        <Routes>
-            <Route element={<DashboardLayout />}>
-                <Route path="/" element={<Overview />} />
-                <Route path="/vto" element={<VTO />} />
-                <Route path="/vdr" element={<VDR />} />
-                <Route path="/integration" element={<Integration />} />
-                <Route path="/billing" element={<Billing />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-        </Routes>
-        </Router>
+        <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+                <Router>
+                    <Routes>
+                        <Route element={<DashboardLayout />}>
+                            <Route path="/" element={<Overview />} />
+                            <Route path="/vto" element={<VTO />} />
+                            <Route path="/vdr" element={<VDR />} />
+                            <Route path="/integration" element={<Integration />} />
+                            <Route path="/billing" element={<Billing />} />
+                        </Route>
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </Router>
+                <Toaster />
+                <Sonner />
+            </TooltipProvider>
+        </QueryClientProvider>
     );
 };
 
 
 const App = () => (
+
+
     <QueryClientProvider client={queryClient}>
         <TooltipProvider>
             <Toaster />
