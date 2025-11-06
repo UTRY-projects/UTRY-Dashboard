@@ -5,6 +5,7 @@ import {
   Shirt,
   Link2,
   CreditCard,
+  ClipboardList,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +28,7 @@ const menuItems = [
   { title: "Virtual Dressing Room", url: "/vdr", icon: Shirt },
   { title: "Integrate with Shopify & Integration health", url: "/integration", icon: Link2 },
   { title: "Subscription & Billing", url: "/billing", icon: CreditCard },
+  { title: "UTRY - Virtual Fitting Room Explained", url: "/UIExplanation", icon: ClipboardList }
 ];
 
 export const DashboardSidebar = ({ productFilter }: DashboardSidebarProps) => {

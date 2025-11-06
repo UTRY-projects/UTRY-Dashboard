@@ -88,7 +88,6 @@ const Integration = () => {
               <Button onClick={handleIntegrateClick}> Integrate </Button>
               <Button> Contact Support </Button>
             </div>
-
           </CardHeader>
         </CardContent>
 
@@ -96,7 +95,6 @@ const Integration = () => {
       </Card>
 
       <Card className="shadow-card grid grid-cols-3 md:grid-cols-1 gap-6">
-
         <CardContent className="space-y-6">
           <CardHeader>
             <CardTitle>Manual installation guide</CardTitle>

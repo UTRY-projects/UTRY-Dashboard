@@ -12,8 +12,10 @@ import Integration from "./pages/Integration";
 import Billing from "./pages/Billing";
 import NotFound from "./pages/NotFound";
 import { useState, useEffect } from "react";
+import UIExplanation from "@/pages/UIExplanation.tsx";
 
 const queryClient = new QueryClient();
+
 
 const ShopifyParamWatcher = ({ children }) => {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -54,6 +56,7 @@ const AppContent = () => (
             <Route path="/vdr" element={<VDR />} />
             <Route path="/integration" element={<Integration />} />
             <Route path="/billing" element={<Billing />} />
+            <Route path="/UIExplanation" element={<UIExplanation />} />
         </Route>
         <Route path="*" element={<NotFound />} />
     </Routes>
