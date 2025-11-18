@@ -208,6 +208,72 @@ const Overview = () => {
     }, [fromISO, toISO, productFilter, app.origin]);
 
       {/* Top Products Table */}
+    return (
+        <div className="space-y-6">
+            {/* Page Header */}
+            <div>
+                <h1 className="text-3xl font-bold text-foreground">Dashboard Overview</h1>
+                <p className="text-muted-foreground mt-1">
+                    Track your virtual try-on performance and product engagement
+                </p>
+            </div>
+
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                <MetricCard
+                    title="Total Try-Ons"
+                    value="12,543"
+                    subtitle="Selected period"
+                    icon={Eye}
+                    tooltip="Total number of virtual try-on sessions across all products in the selected date range"
+                />
+                <MetricCard
+                    title="Active Products"
+                    value="247"
+                    subtitle="VTO + VDR combined"
+                    icon={Package}
+                    tooltip="Total number of products currently available for virtual try-on across both VTO and VDR"
+                />
+            </div>
+
+            {/* Chart */}
+            <Card className="shadow-card">
+                <CardHeader>
+                    <CardTitle>Try-Ons Over Time</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={mockChartData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis
+                                dataKey="date"
+                                stroke="hsl(var(--muted-foreground))"
+                                fontSize={12}
+                            />
+                            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: "hsl(var(--card))",
+                                    border: "1px solid hsl(var(--border))",
+                                    borderRadius: "8px",
+                                }}
+                            />
+                            <Line
+                                type="monotone"
+                                dataKey="tryOns"
+                                stroke="hsl(var(--primary))"
+                                strokeWidth={3}
+                                dot={{ fill: "hsl(var(--primary))", r: 4 }}
+                            />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+            {/* Top Products Table */}
+
+        </div>
+    );
 
 };
 
