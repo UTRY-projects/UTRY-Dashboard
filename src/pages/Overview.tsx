@@ -160,36 +160,36 @@ const Overview = () => {
             setLoading(true);
             setError(null);
             try {
-                // const ShopParams = new URLSearchParams(window.location.search);
-                // const shopName = ShopParams.get('shop').replace(/\.myshopify\.com$/, "");
-                // console.log(`Fetching API key for shop: ${shopName}`);
-                // const apiKey = await api.get<string>(
-                //     "/api/Dashboard/GetStoreApiKey",
-                //     { storeName: shopName },
-                //     { signal: controller.signal, }
-                // );
-                // if (!apiKey || typeof apiKey !== "string") {
-                //     throw new Error("API Key could not be retrieved or is invalid.");
-                // }
+                const ShopParams = new URLSearchParams(window.location.search);
+                const shopName = ShopParams.get('shop').replace(/\.myshopify\.com$/, "");
+                console.log(`Fetching API key for shop: ${shopName}`);
+                const apiKey = await api.get<string>(
+                    "/api/Dashboard/GetStoreApiKey",
+                    { storeName: shopName },
+                    { signal: controller.signal, }
+                );
+                if (!apiKey || typeof apiKey !== "string") {
+                    throw new Error("API Key could not be retrieved or is invalid.");
+                }
 
-                // const params = {
-                //     from: fromISO,
-                //     to: toISO,
-                //     api_key: apiKey,
-                //     productFilter: productFilter === "all" ? undefined : productFilter,
-                // };
+                const params = {
+                    from: fromISO,
+                    to: toISO,
+                    api_key: apiKey,
+                    productFilter: productFilter === "all" ? undefined : productFilter,
+                };
 
-                //console.log("Fetching from backend with params:", params);
+                console.log("Fetching from backend with params:", params);
 
-                //const data = await api.get<unknown>("/api/Dashboard/GetCalculations", params, {
-                  //  signal: controller.signal,
-                //});
+                const data = await api.get<unknown>("/api/Dashboard/GetCalculations", params, {
+                    signal: controller.signal,
+                });
 
-                //console.log("Data received:", data);
+                console.log("Data received:", data);
 
-                //const total = toFiniteNumber(data);
-                //console.log("Total tries:", total);
-                //setTotalTries(total);
+                const total = toFiniteNumber(data);
+                console.log("Total tries:", total);
+                setTotalTries(total);
 
             } catch (e) {
                 if ((e as Error).name !== "AbortError") {
@@ -208,6 +208,87 @@ const Overview = () => {
     }, [fromISO, toISO, productFilter, app.origin]);
 
       {/* Top Products Table */}
+    return (
+        <div className="space-y-6">
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
+                <MetricCard
+                    title="Total Try-Ons"
+                    value={loading ? "..." : totalTries.toLocaleString()}
+                    subtitle="Selected period"
+                    icon={Eye}
+                    tooltip="Total number of virtual try-on sessions across all products in the selected date range"
+                />
+                <MetricCard
+                    title="Active Products"
+                    value="247"
+                    subtitle="VTO + VDR combined"
+                    icon={Package}
+                    tooltip="Total number of products currently available for virtual try-on across both VTO and VDR"
+                />
+            </div>
+
+            {/* Try-On Trends Chart */}
+            <Card className="shadow-card">
+                <CardHeader>
+                    <CardTitle>Try-On Trends</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <LineChart data={mockChartData}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                            <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                            <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: "hsl(var(--card))",
+                                    border: "1px solid hsl(var(--border))",
+                                    borderRadius: "8px",
+                                }}
+                            />
+                            <Line type="monotone" dataKey="tryOns" stroke="hsl(var(--primary))" strokeWidth={2} />
+                        </LineChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+            {/* Top Products Table */}
+            <Card className="shadow-card">
+                <CardHeader>
+                    <CardTitle>Top Performing Products</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Product</TableHead>
+                                <TableHead>Type</TableHead>
+                                <TableHead>Try-Ons</TableHead>
+                                <TableHead className="text-right">Conversion</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {mockProducts.map((product) => (
+                                <TableRow key={product.id}>
+                                    <TableCell className="flex items-center gap-3">
+                                        <img src={product.image} alt={product.name} className="h-10 w-10 rounded-md object-cover" />
+                                        <span className="font-medium">{product.name}</span>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant={product.type === "VTO" ? "default" : "secondary"}>
+                                            {product.type}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>{product.tryOns.toLocaleString()}</TableCell>
+                                    <TableCell className="text-right">{product.conversionRate}%</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </div>
+    );
 
 };
 
