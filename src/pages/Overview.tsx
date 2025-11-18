@@ -160,36 +160,36 @@ const Overview = () => {
             setLoading(true);
             setError(null);
             try {
-                const ShopParams = new URLSearchParams(window.location.search);
-                const shopName = ShopParams.get('shop').replace(/\.myshopify\.com$/, "");
-                console.log(`Fetching API key for shop: ${shopName}`);
-                const apiKey = await api.get<string>(
-                    "/api/Dashboard/GetStoreApiKey",
-                    { storeName: shopName },
-                    { signal: controller.signal, }
-                );
-                if (!apiKey || typeof apiKey !== "string") {
-                    throw new Error("API Key could not be retrieved or is invalid.");
-                }
+                // const ShopParams = new URLSearchParams(window.location.search);
+                // const shopName = ShopParams.get('shop').replace(/\.myshopify\.com$/, "");
+                // console.log(`Fetching API key for shop: ${shopName}`);
+                // const apiKey = await api.get<string>(
+                //     "/api/Dashboard/GetStoreApiKey",
+                //     { storeName: shopName },
+                //     { signal: controller.signal, }
+                // );
+                // if (!apiKey || typeof apiKey !== "string") {
+                //     throw new Error("API Key could not be retrieved or is invalid.");
+                // }
 
-                const params = {
-                    from: fromISO,
-                    to: toISO,
-                    api_key: apiKey,
-                    productFilter: productFilter === "all" ? undefined : productFilter,
-                };
+                // const params = {
+                //     from: fromISO,
+                //     to: toISO,
+                //     api_key: apiKey,
+                //     productFilter: productFilter === "all" ? undefined : productFilter,
+                // };
 
-                console.log("Fetching from backend with params:", params);
+                //console.log("Fetching from backend with params:", params);
 
-                const data = await api.get<unknown>("/api/Dashboard/GetCalculations", params, {
-                    signal: controller.signal,
-                });
+                //const data = await api.get<unknown>("/api/Dashboard/GetCalculations", params, {
+                  //  signal: controller.signal,
+                //});
 
-                console.log("Data received:", data);
+                //console.log("Data received:", data);
 
-                const total = toFiniteNumber(data);
-                console.log("Total tries:", total);
-                setTotalTries(total);
+                //const total = toFiniteNumber(data);
+                //console.log("Total tries:", total);
+                //setTotalTries(total);
 
             } catch (e) {
                 if ((e as Error).name !== "AbortError") {

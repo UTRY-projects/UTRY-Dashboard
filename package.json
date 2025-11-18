@@ -1,17 +1,18 @@
 {
-  "name": "vite_react_shadcn_ts",
+ "name": "vite_react_shadcn_ts",
   "homepage": "https://utry-projects.github.io/UTRY-Dashboard/",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "build:dev": "vite build --mode development",
+    "build:prod": "vite build",
+    "build:testing": "vite build --base /UTRY-Dashboard/testing/",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy:prod": "npm run build:prod && gh-pages -d dist -b gh-pages",
+    "deploy:testing": "npm run build:testing && gh-pages -d dist --dest testing -b gh-pages"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

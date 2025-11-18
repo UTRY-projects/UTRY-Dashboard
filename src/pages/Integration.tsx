@@ -25,47 +25,47 @@ const errorLogs = [
 
 const Integration = () => {
 
-  const [searchParams] = useSearchParams();
-  const host = searchParams.get("host");
-  const shop = searchParams.get("shop");
+  // const [searchParams] = useSearchParams();
+  // const host = searchParams.get("host");
+  // const shop = searchParams.get("shop");
 
-  // Always call useMemo, but only create the app if host is present
-  const app = React.useMemo(() => {
-    if (!host) return null;
-    return createApp({
-      apiKey,
-      host,
-      forceRedirect: true,
-    });
-  }, [host]);
+  // // Always call useMemo, but only create the app if host is present
+  // const app = React.useMemo(() => {
+  //   if (!host) return null;
+  //   return createApp({
+  //     apiKey,
+  //     host,
+  //     forceRedirect: true,
+  //   });
+  // }, [host]);
 
-  // Early return for missing params, but after all hooks
-  if (!host || !shop) {
-    // Avoid infinite reloads by checking if we've already tried to reload
-    if (!window.location.search.includes("reloaded=1")) {
-      const params = new URLSearchParams(window.location.search);
-      params.set("reloaded", "1");
-      window.location.search = params.toString();
-      return null;
-    }
-    return (
-        <div>
-          <p>
-            Please reload the page to view the content(This is due to a shopify limitation that this page won't load propperly until you reload this page).
-          </p>
-          <p>
-            <strong>Press F5 or CTRL+R to reload the page.</strong>
-          </p>
-        </div>
-    );
-  }
+  // // Early return for missing params, but after all hooks
+  // if (!host || !shop) {
+  //   // Avoid infinite reloads by checking if we've already tried to reload
+  //   if (!window.location.search.includes("reloaded=1")) {
+  //     const params = new URLSearchParams(window.location.search);
+  //     params.set("reloaded", "1");
+  //     window.location.search = params.toString();
+  //     return null;
+  //   }
+  //   return (
+  //       <div>
+  //         <p>
+  //           Please reload the page to view the content(This is due to a shopify limitation that this page won't load propperly until you reload this page).
+  //         </p>
+  //         <p>
+  //           <strong>Press F5 or CTRL+R to reload the page.</strong>
+  //         </p>
+  //       </div>
+  //   );
+  // }
 
-  const handleIntegrateClick = () => {
-    if (!app) return;
-    const url = `/admin/themes/current/editor?template=product&addAppBlockId=${apiKey}/${blockHandle}&target=newAppsSection`;
-    const redirect = Redirect.create(app);
-    redirect.dispatch(Redirect.Action.ADMIN_PATH, url);
-  };
+  //const handleIntegrateClick = () => {
+  //if (!app) return;
+  //const url = `/admin/themes/current/editor?template=product&addAppBlockId=${apiKey}/${blockHandle}&target=newAppsSection`;
+  //const redirect = Redirect.create(app);
+  //redirect.dispatch(Redirect.Action.ADMIN_PATH, url);
+  //};
 
   return (
     <div className="space-y-6">
@@ -84,15 +84,26 @@ const Integration = () => {
           <CardHeader>
             <CardTitle>Integration</CardTitle>
             <p>With the inegration the app will be embeded into product pages. Click button below to start Integration</p>
-            <div className="flex gap-4 mt">
-              <Button onClick={handleIntegrateClick}> Integrate </Button>
-              <Button> Contact Support </Button>
-            </div>
+            <Button /*onClick={handleIntegrateClick}*/> Integrate </Button>
           </CardHeader>
         </CardContent>
-
-
       </Card>
+
+
+      {/* Integration Status Card */}
+      <Card className="shadow-card grid grid-cols-3 md:grid-cols-1 gap-6">
+
+        <CardContent className="space-y-6">
+          <CardHeader>
+            <CardTitle>Contact Support</CardTitle>
+            <p>Issues with integration? Contact UTRY on:</p>
+            <p>Mail: <strong>contact@utry.com </strong></p>
+          </CardHeader>
+        </CardContent>
+      </Card>
+
+
+
 
       <Card className="shadow-card grid grid-cols-3 md:grid-cols-1 gap-6">
         <CardContent className="space-y-6">
@@ -100,8 +111,8 @@ const Integration = () => {
             <CardTitle>Manual installation guide</CardTitle>
             <h2>Our app requires following permissions:</h2>
             <ul className="list-disc pl-4">
-              <li>To read products: This is done to find your product in our database so we can render the clothing onto the 3D model.</li>
-              <li>To read orders: This is done to log if users have actually used this app to purchase your items, so we can see if the app is being used, and how much it is being used.</li>
+              <li><strong>To read products:</strong> This is done to find your product in our database so we can render the clothing onto the 3D model.</li>
+              <li><strong>To read orders:</strong> This is done to log if users have actually used this app to purchase your items, so we can see if the app is being used, and how much it is being used.</li>
               <li>Before installing the app, you will need to talk with our representative, so that we can model your clothing items, so that your customers can see the correct clothing items on the 3D model. As well as discuss a payment plan.</li>
               <p><strong>This is critical, since our app will not be able to show the correct clothing if you have not done this.</strong></p>
             </ul>
@@ -162,40 +173,43 @@ const Integration = () => {
                 <li>g.	Press products</li>
                 <img src="UTRY_instalation_guide_img/Billede13.png" alt="main menu products section" />
                 <li>h.	For each product:</li>
-                  <ul className="list-decimal pl-10">
-                    <li>Click into a product</li>
-                    <li>Scroll all the way down</li>
-                    <li>Here you will find the new EAN field, and on each product you should fill in the corresponding EAN provided to you for each product, and press save whenever you are done with one.</li>
-                    <img src="UTRY_instalation_guide_img/Billede14.png" alt="product specific EAN type field" />
-                    <p>if you do not fill this in correctly it will default to an ean that will lead to the default clothing item.</p>
-                  </ul>
+                <ul className="list-decimal pl-10">
+                  <li>Click into a product</li>
+                  <li>Scroll all the way down</li>
+                  <li>Here you will find the new EAN field, and on each product you should fill in the corresponding EAN provided to you for each product, and press save whenever you are done with one.</li>
+                  <img src="UTRY_instalation_guide_img/Billede14.png" alt="product specific EAN type field" />
+                  <p>if you do not fill this in correctly it will default to an ean that will lead to the default clothing item.</p>
+                </ul>
               </ul>
             </ul>
-          </CardHeader>
-           <CardHeader>
-            <CardTitle>Uninstalation guide</CardTitle>
-            <ul className="list-decimal pl-4">
-              <li className="pl-4">Log into shopify admin panel</li>
-              <li className="pl-4">Navigate to settings in the bottom-left corner</li>
-              <li className="pl-4">Navigate to Apps and sales channel</li>
-              <li className="pl-4">Find UTRY app from the list</li>
-              <li className="pl-4">Click the three dots next to the apps name</li>
-              <li className="pl-4">Click the uninstall from the options that appear</li>
-              <li className="pl-4">If prompted, select a reason for uninstalling the app from the dropdown menu</li>
-              <li className="pl-4">Click uninstall to complete the process.</li>
-            </ul>
-          </CardHeader>
-        </CardContent>
-      
+            </CardHeader>
+            </CardContent>
+          </Card>
 
-      </Card>
+          <Card className="shadow-card grid grid-cols-3 md:grid-cols-1 gap-6">
+            <CardContent className="space-y-6">
+              <CardHeader>
+                <CardTitle>Uninstalation guide</CardTitle>
+                <ul className="list-decimal pl-4">
+                  <li className="pl-4">Log into shopify admin panel</li>
+                  <li className="pl-4">Navigate to settings in the bottom-left corner</li>
+                  <li className="pl-4">Navigate to Apps and sales channel</li>
+                  <li className="pl-4">Find UTRY app from the list</li>
+                  <li className="pl-4">Click the three dots next to the apps name</li>
+                  <li className="pl-4">Click the uninstall from the options that appear</li>
+                  <li className="pl-4">If prompted, select a reason for uninstalling the app from the dropdown menu</li>
+                  <li className="pl-4">Click uninstall to complete the process.</li>
+                </ul>
+              </CardHeader>
+            </CardContent>
+          </Card>
 
 
 
 
 
 
-      {/* Error Logs
+          {/* Error Logs
       <Card className="shadow-card">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -243,9 +257,9 @@ const Integration = () => {
         </CardContent>
       </Card>
          */}
-    </div>
-  );
+        </div>
+        );
 };
 
-export default Integration;
+        export default Integration;
 

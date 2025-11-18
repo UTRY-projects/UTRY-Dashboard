@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, HashRouter, useSearchParams } from "react-router-dom";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
-import Overview from "./pages/Overview";
+import Overview from "@/pages/Overview";
 import VTO from "./pages/VTO";
 import VDR from "./pages/VDR";
 import Integration from "./pages/Integration";
