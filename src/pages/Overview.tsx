@@ -91,29 +91,13 @@ const Overview = () => {
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
         <MetricCard
           title="Total Try-Ons"
           value="12,543"
           subtitle="Selected period"
           icon={Eye}
           tooltip="Total number of virtual try-on sessions across all products in the selected date range"
-        />
-        <MetricCard
-          title="Conversion Rate"
-          value="24.3%"
-          subtitle="+12.5% vs baseline before UTRY"
-          icon={TrendingUp}
-          trend={{ value: 12.5, isPositive: true }}
-          tooltip="Percentage of try-on sessions that resulted in a purchase, compared to your baseline before using UTRY"
-        />
-        <MetricCard
-          title="Return Rate"
-          value="18.7%"
-          subtitle="-8.2% vs baseline before UTRY"
-          icon={TrendingDown}
-          trend={{ value: 8.2, isPositive: true }}
-          tooltip="Percentage of purchases that were returned, showing the reduction compared to your baseline before UTRY"
         />
         <MetricCard
           title="Active Products"
@@ -159,57 +143,7 @@ const Overview = () => {
       </Card>
 
       {/* Top Products Table */}
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle>Top 5 Products</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead className="text-right">Try-Ons</TableHead>
-                <TableHead className="text-right">Conversion Rate</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockProducts.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="h-12 w-12 rounded-lg object-cover"
-                      />
-                      <span className="font-medium">{product.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="secondary"
-                      className={
-                        product.type === "VTO"
-                          ? "bg-primary/10 text-primary"
-                          : "bg-secondary/10 text-secondary"
-                      }
-                    >
-                      {product.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {product.tryOns.toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {product.conversionRate}%
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+
     </div>
   );
 };

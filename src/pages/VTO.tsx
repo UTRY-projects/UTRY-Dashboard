@@ -72,7 +72,7 @@ const VTO = () => {
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
         <MetricCard
           title="Total VTO Try-Ons"
           value="8,547"
@@ -80,22 +80,6 @@ const VTO = () => {
           icon={Eye}
           trend={{ value: 15.3, isPositive: true }}
           tooltip="Total number of photo-based virtual try-on sessions in the selected date range"
-        />
-        <MetricCard
-          title="Conversion Rate"
-          value="32.4%"
-          subtitle="+14.2% vs baseline before UTRY"
-          icon={TrendingUp}
-          trend={{ value: 14.2, isPositive: true }}
-          tooltip="Percentage of VTO sessions that resulted in purchases, compared to baseline before using UTRY"
-        />
-        <MetricCard
-          title="Return Rate"
-          value="16.3%"
-          subtitle="-9.1% vs baseline before UTRY"
-          icon={TrendingDown}
-          trend={{ value: 9.1, isPositive: true }}
-          tooltip="Percentage of VTO purchases that were returned, showing reduction from baseline"
         />
         <MetricCard
           title="Unique Users"
@@ -141,61 +125,6 @@ const VTO = () => {
       </Card>
 
       {/* Products Table */}
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle>VTO Product Library</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>SKU</TableHead>
-                <TableHead className="text-right">Try-Ons</TableHead>
-                <TableHead className="text-right">Conversion Rate</TableHead>
-                <TableHead className="text-right">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockVTOProducts.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="h-12 w-12 rounded-lg object-cover"
-                      />
-                      <span className="font-medium">{product.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground font-mono text-sm">
-                    {product.sku}
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {product.tryOns > 0 ? product.tryOns.toLocaleString() : "—"}
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {product.conversionRate > 0 ? `${product.conversionRate}%` : "—"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge
-                      variant={product.status === "active" ? "default" : "secondary"}
-                      className={
-                        product.status === "active"
-                          ? "bg-success/10 text-success hover:bg-success/20"
-                          : "bg-warning/10 text-warning hover:bg-warning/20"
-                      }
-                    >
-                      {product.status}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
     </div>
   );
 };

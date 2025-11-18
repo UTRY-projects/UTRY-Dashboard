@@ -79,7 +79,7 @@ const VDR = () => {
       </div>
 
       {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
         <MetricCard
           title="Total VDR Try-Ons"
           value="3,996"
@@ -87,22 +87,6 @@ const VDR = () => {
           icon={Eye}
           trend={{ value: 8.2, isPositive: true }}
           tooltip="Total number of 3D garment try-ons using virtual avatars in the selected date range"
-        />
-        <MetricCard
-          title="Conversion Rate"
-          value="29.1%"
-          subtitle="+11.3% vs baseline before UTRY"
-          icon={TrendingUp}
-          trend={{ value: 11.3, isPositive: true }}
-          tooltip="Percentage of VDR sessions that resulted in purchases, compared to baseline before using UTRY"
-        />
-        <MetricCard
-          title="Return Rate"
-          value="14.2%"
-          subtitle="-7.8% vs baseline before UTRY"
-          icon={TrendingDown}
-          trend={{ value: 7.8, isPositive: true }}
-          tooltip="Percentage of VDR purchases that were returned, showing reduction from baseline"
         />
         <MetricCard
           title="Unique Users"
@@ -144,76 +128,6 @@ const VDR = () => {
               />
             </LineChart>
           </ResponsiveContainer>
-        </CardContent>
-      </Card>
-
-      {/* Products Table */}
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle>3D Product Library</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead className="text-right">Try-Ons</TableHead>
-                <TableHead className="text-right">Conversion Rate</TableHead>
-                <TableHead className="text-right">Integration</TableHead>
-                <TableHead className="text-right">File Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mockVDRProducts.map((product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="h-12 w-12 rounded-lg object-cover"
-                      />
-                      <span className="font-medium">{product.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {product.tryOns > 0 ? product.tryOns.toLocaleString() : "—"}
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {product.conversionRate > 0 ? `${product.conversionRate}%` : "—"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge
-                      variant={
-                        product.integrationStatus === "connected"
-                          ? "default"
-                          : "secondary"
-                      }
-                      className={
-                        product.integrationStatus === "connected"
-                          ? "bg-success/10 text-success hover:bg-success/20"
-                          : "bg-warning/10 text-warning hover:bg-warning/20"
-                      }
-                    >
-                      {product.integrationStatus}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge
-                      variant={product.fileStatus === "live" ? "default" : "secondary"}
-                      className={
-                        product.fileStatus === "live"
-                          ? "bg-success/10 text-success hover:bg-success/20"
-                          : "bg-warning/10 text-warning hover:bg-warning/20"
-                      }
-                    >
-                      {product.fileStatus}
-                    </Badge>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
         </CardContent>
       </Card>
     </div>
