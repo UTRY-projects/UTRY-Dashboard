@@ -12,10 +12,38 @@ export default defineConfig(({ mode }) => ({
 
   server: {
     host: "::",
-    port: 8080,
+    port: 8081,
     hmr: {
-      host: "840e847d4b5d.ngrok-free.app",
+      // --- CORRECTED ---
+      // The host should be just the hostname, without the protocol or trailing slash.
+      host: "jennet-sweeping-warthog.ngrok-free.app",
       protocol: "wss",
+    },
+    proxy: {
+      // Forward API calls from the dev server to your backend tunnel
+      "/api": {
+        target: "https://jennet-sweeping-warthog.ngrok-free.app/",
+        changeOrigin: true,
+        secure: false,
+        headers: {
+          "ngrok-skip-browser-warning": "true",
+        },
+        configure: (proxy, _options) => {
+          proxy.on("error", (err, _req, _res) => {
+            console.log("Vite Proxy Error:", err);
+          });
+          proxy.on("proxyReq", (proxyReq, req, _res) => {
+            console.log("Vite Proxy Sending Request:", req.method, req.url);
+          });
+          proxy.on("proxyRes", (proxyRes, req, _res) => {
+            console.log(
+                "Vite Proxy Received Response:",
+                proxyRes.statusCode,
+                req.url
+            );
+          });
+        },
+      },
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),

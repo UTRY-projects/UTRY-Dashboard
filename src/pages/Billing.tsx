@@ -19,6 +19,11 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
+import {Button as PolarisButton} from "@shopify/polaris"
+import { useAppBridge } from "@shopify/app-bridge-react";
+import { Redirect } from "@shopify/app-bridge/actions";
+import { api } from "@/lib/api";
+import { useAuthenticatedApi } from "@/lib/api";
 
 const invoices = [
     {
@@ -47,7 +52,12 @@ const usageHistory = [
     {month: "Jan", amount: 8467},
 ];
 
+type BillingResponse = {
+    OneTimeConfirmationUrl: string;
+};
+
 const Billing = () => {
+    const authenticatedApi = useAuthenticatedApi();
     return (
         <div className="space-y-6">
             {/* Page Header */}
@@ -69,29 +79,49 @@ const Billing = () => {
                                 Starter
                             </div>
                             Subscription price/month:
-                            <div className="text-xl font-bold pb-4">$600</div>
+                            <div className="text-xl font-bold pb-4">1549</div>
                             <p className="text-sm">Subscription includes:</p>
-                            <div className="text-m"> Free usages: <strong>3500</strong></div>
+                            <div className="text-m"> Free usages: <strong>5000</strong></div>
                             <div className="text-m pb-4">Free garments: <strong>5</strong></div>
-                            <p className="text-sm">Integration price</p>
-                            <div className="text-m font-bold pb-4">$800</div>
+                            {/*<p className="text-sm">Integration price</p>*/}
+                            {/*<div className="text-m font-bold pb-4">$800</div>*/}
                             <p>Price per additional *usages</p>
                             <div className="text-m"><strong>$0.22</strong> / 24 hours</div>
                             <p className="text-sm pb-4">*usage: unique user/24 hours</p>
                             <p>price per additional garment</p>
                             <div className="text-m"><strong>$150</strong> / garment</div>
+                            <PolarisButton
+                                variant="primary"
+                                onClick={async () => {
+                                    const params = new URLSearchParams(window.location.search);
+                                    const shop = params.get('shop');
+                                    const plan = 'standard-plan';
+                                    const integrationData = await authenticatedApi.get<BillingResponse>(
+                                        "/api/billing/IntegrationFee",
+                                        {
+                                            shop,
+                                            step: 'integrationfee',
+                                            plan: plan
+                                        }
+                                    );
+                                    console.log(integrationData)
+                                    window.location.href = integrationData.OneTimeConfirmationUrl;
+                                }}
+                            >
+                                Select Standard Plan
+                            </PolarisButton>
                         </div>
                         <div className="p-4 rounded-lg border border-border">
                             <div className="text-sm text-muted-foreground mb-1">
                                 Growth
                             </div>
                             Subscription price/month:
-                            <div className="text-xl font-bold pb-4">$1159</div>
+                            <div className="text-xl font-bold pb-4">4199</div>
                             <p className="text-sm">Subscription includes:</p>
-                            <div className="text-m"> Free usages: <strong>8500</strong></div>
+                            <div className="text-m"> Free usages: <strong>15,000</strong></div>
                             <div className="text-m pb-4">Free garments: <strong>15</strong></div>
-                            <p className="text-sm">Integration price</p>
-                            <div className="text-m font-bold pb-4">$1500</div>
+                            {/*<p className="text-sm">Integration price</p>*/}
+                            {/*<div className="text-m font-bold pb-4">$1500</div>*/}
                             <p>Price per additional *usages</p>
                             <div className="text-m"><strong>$0.19</strong> / 24 hours</div>
                             <p className="text-sm pb-4">*usage: unique user/24 hours</p>

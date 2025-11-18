@@ -21,6 +21,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
+
+
 const mockChartData = [
   { date: "Mon", avatarTryOns: 320 },
   { date: "Tue", avatarTryOns: 450 },
