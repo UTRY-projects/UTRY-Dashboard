@@ -118,6 +118,10 @@ const Overview = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const fromISO = useMemo(
+        () => (dateRange?.from ? dateRange.from.toISOString() : undefined),
+        [dateRange?.from]
+    );
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
         <MetricCard
@@ -140,6 +144,68 @@ const Overview = () => {
         () => (dateRange?.to ? dateRange.to.toISOString() : undefined),
         [dateRange?.to]
     );
+
+    useEffect(() => {
+        if (!fromISO || !toISO) {
+            console.warn("Skipping fetch: missing date range");
+            setTotalTries(0);
+            return;
+        }
+
+        const controller = new AbortController();
+
+        const fetchData = async () => {
+
+
+            setLoading(true);
+            setError(null);
+            try {
+                const ShopParams = new URLSearchParams(window.location.search);
+                const shopName = ShopParams.get('shop').replace(/\.myshopify\.com$/, "");
+                console.log(`Fetching API key for shop: ${shopName}`);
+                const apiKey = await api.get<string>(
+                    "/api/Dashboard/GetStoreApiKey",
+                    { storeName: shopName },
+                    { signal: controller.signal, }
+                );
+                if (!apiKey || typeof apiKey !== "string") {
+                    throw new Error("API Key could not be retrieved or is invalid.");
+                }
+
+                const params = {
+                    from: fromISO,
+                    to: toISO,
+                    api_key: apiKey,
+                    productFilter: productFilter === "all" ? undefined : productFilter,
+                };
+
+                console.log("Fetching from backend with params:", params);
+
+                const data = await api.get<unknown>("/api/Dashboard/GetCalculations", params, {
+                    signal: controller.signal,
+                });
+
+                console.log("Data received:", data);
+
+                const total = toFiniteNumber(data);
+                console.log("Total tries:", total);
+                setTotalTries(total);
+
+            } catch (e) {
+                if ((e as Error).name !== "AbortError") {
+                    setError((e as Error).message);
+                    console.error("Fetch failed:", e);
+                    setTotalTries(0);
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+
+        return () => controller.abort();
+    }, [fromISO, toISO, productFilter, app.origin]);
 
       {/* Top Products Table */}
 
