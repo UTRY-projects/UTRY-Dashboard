@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useSearchParams } from "react-router-dom";
 
-const apiKey = "6feca39509df11b363bb0a7300580b2f";
+const apiKey = "e14bf313b6a8e797f3b076d7090b9fad";
 const blockHandle = "utry-button";
 
 const errorLogs = [
@@ -62,7 +62,7 @@ const Integration = () => {
 
   const handleIntegrateClick = () => {
     if (!app) return;
-    const url = `/admin/themes/current/editor?template=product&addAppBlockId=${apiKey}/${blockHandle}&target=newAppsSection`;
+    const url = `/admin/themes/current/editor?template=product&addAppBlockId=${apiKey}/${blockHandle}&target=sectionId:main`;
     const redirect = Redirect.create(app);
     redirect.dispatch(Redirect.Action.ADMIN_PATH, url);
   };
