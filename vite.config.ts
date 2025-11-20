@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8081,
-    allowedHosts: ["lobby-phys-other-voice.trycloudflare.com", "jennet-sweeping-warthog.ngrok-free.app"],
+    allowedHosts: ["jose-disposition-queen-flour.trycloudflare.com", "jennet-sweeping-warthog.ngrok-free.app"],
     hmr: {
       // --- CORRECTED ---
       // The host should be just the hostname, without the protocol or trailing slash.

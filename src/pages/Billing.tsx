@@ -20,9 +20,11 @@ import {
     ResponsiveContainer,
 } from "recharts";
 import {Button as PolarisButton} from "@shopify/polaris"
-import { useAppBridge } from "@shopify/app-bridge-react";
-import { Redirect } from "@shopify/app-bridge/actions";
-import { api } from "@/lib/api";
+// ---------------------------------------------------------
+// CHANGE 1: Remove the deprecated utils import
+// import {getSessionToken} from "@shopify/app-bridge-utils";
+// ---------------------------------------------------------
+import {useAppBridge} from "@shopify/app-bridge-react";
 import { useAuthenticatedApi } from "@/lib/api";
 
 const invoices = [
@@ -53,100 +55,81 @@ const usageHistory = [
 ];
 
 type BillingResponse = {
-    OneTimeConfirmationUrl: string;
+    oneTimeConfirmationUrl?: string;
+    OneTimeConfirmationUrl?: string;
+    confirmationUrl?: string;
 };
 
 const Billing = () => {
+    // Use your custom hook that wraps fetch + app.idToken()
     const authenticatedApi = useAuthenticatedApi();
+
+    const handlePlanSelection = async (planName: string) => {
+        try {
+            console.log(`Initiating ${planName}...`);
+
+            // 1. Get the shop from the URL (standard for embedded apps)
+            const searchParams = new URLSearchParams(window.location.search);
+            const shop = searchParams.get("shop");
+            if (!shop) {
+                console.error("Shop parameter missing");
+                return;
+            }
+
+            // 2. Call your backend
+            // Note: We pass 'plan' as a query param as expected by the new Controller
+            const data = await authenticatedApi.get<BillingResponse>(
+                `/api/billing/IntegrationFee?shop=${shop}&plan=${planName}`
+            );
+
+            const url = data.oneTimeConfirmationUrl || data.OneTimeConfirmationUrl || data.confirmationUrl;
+
+            if (url) {
+                window.open(url, "_top");
+            } else {
+                console.error("No confirmation URL returned", data);
+            }
+        } catch (err) {
+            console.error("Billing error", err);
+        }
+    };
+
     return (
         <div className="space-y-6">
-            {/* Page Header */}
-            <div>
-                <h1 className="text-3xl font-bold text-foreground">Subscription & Billing</h1>
-                <p className="text-muted-foreground mt-1">
-                    Manage your subscription and view usage details
-                </p>
-            </div>
-
             <Card className="shadow-card">
-                <CardHeader>
-                    <CardTitle>Subscription plans</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle>Subscription plans</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* STARTER PLAN */}
                         <div className="p-4 rounded-lg border border-border">
-                            <div className="text-sm text-muted-foreground mb-1">
-                                Starter
-                            </div>
-                            Subscription price/month:
+                            <div className="text-sm text-muted-foreground mb-1">Starter</div>
                             <div className="text-xl font-bold pb-4">1549</div>
-                            <p className="text-sm">Subscription includes:</p>
-                            <div className="text-m"> Free usages: <strong>5000</strong></div>
-                            <div className="text-m pb-4">Free garments: <strong>5</strong></div>
-                            {/*<p className="text-sm">Integration price</p>*/}
-                            {/*<div className="text-m font-bold pb-4">$800</div>*/}
-                            <p>Price per additional *usages</p>
-                            <div className="text-m"><strong>$0.22</strong> / 24 hours</div>
-                            <p className="text-sm pb-4">*usage: unique user/24 hours</p>
-                            <p>price per additional garment</p>
-                            <div className="text-m"><strong>$150</strong> / garment</div>
-                            <PolarisButton
-                                variant="primary"
-                                onClick={async () => {
-                                    const params = new URLSearchParams(window.location.search);
-                                    const shop = params.get('shop');
-                                    const plan = 'standard-plan';
-                                    const integrationData = await authenticatedApi.get<BillingResponse>(
-                                        "/api/billing/IntegrationFee",
-                                        {
-                                            shop,
-                                            step: 'integrationfee',
-                                            plan: plan
-                                        }
-                                    );
-                                    console.log(integrationData)
-                                    window.location.href = integrationData.OneTimeConfirmationUrl;
-                                }}
+                            <Button
+                                onClick={() => handlePlanSelection("standard-plan")}
                             >
                                 Select Standard Plan
-                            </PolarisButton>
+                            </Button>
                         </div>
+                        {/* GROWTH PLAN */}
                         <div className="p-4 rounded-lg border border-border">
-                            <div className="text-sm text-muted-foreground mb-1">
-                                Growth
-                            </div>
-                            Subscription price/month:
+                            <div className="text-sm text-muted-foreground mb-1">Growth</div>
                             <div className="text-xl font-bold pb-4">4199</div>
-                            <p className="text-sm">Subscription includes:</p>
-                            <div className="text-m"> Free usages: <strong>15,000</strong></div>
-                            <div className="text-m pb-4">Free garments: <strong>15</strong></div>
-                            {/*<p className="text-sm">Integration price</p>*/}
-                            {/*<div className="text-m font-bold pb-4">$1500</div>*/}
-                            <p>Price per additional *usages</p>
-                            <div className="text-m"><strong>$0.19</strong> / 24 hours</div>
-                            <p className="text-sm pb-4">*usage: unique user/24 hours</p>
-                            <p>price per additional garment</p>
-                            <div className="text-m"><strong>$120</strong> / garment</div>
+                            <Button
+                                onClick={() => handlePlanSelection("growth-plan")}
+                            >
+                                Select Growth Plan
+                            </Button>
                         </div>
+                        {/* ENTERPRISE PLAN */}
                         <div className="p-4 rounded-lg border border-border">
-                            <div className="text-sm text-muted-foreground mb-1">
-                                Enterprise
-                            </div>
+                            <div className="text-sm text-muted-foreground mb-1">Enterprise</div>
                             <div className="text-xl font-bold">Custom pricing</div>
-                            <p className="pb-4">Contact UTRY</p>
-                            <p className="text-sm">bennefits:</p>
-                            <ul className="list-disc pl-4">
-                                <li>Specifik usage price</li>
-                                <li>Low subscription cost</li>
-                                <li>Extra garments</li>
-                            </ul>
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
-
-            {/* Active Subscriptions */}
+            {/* Active Subscriptions - unchanged ... */}
             <Card className="shadow-card">
                 <CardHeader>
                     <CardTitle>Active Subscriptions</CardTitle>
@@ -183,7 +166,7 @@ const Billing = () => {
                 </CardContent>
             </Card>
 
-            {/* Account Summary */}
+            {/* Account Summary - unchanged ... */}
             <Card className="shadow-card">
                 <CardHeader>
                     <CardTitle>Current Plan</CardTitle>
@@ -238,7 +221,7 @@ const Billing = () => {
                 </CardContent>
             </Card>
 
-            {/* Usage Overview */}
+            {/* Usage Overview - unchanged ... */}
             <Card className="shadow-card">
                 <CardHeader>
                     <CardTitle>Usage Overview</CardTitle>
@@ -308,7 +291,7 @@ const Billing = () => {
                 </CardContent>
             </Card>
 
-            {/* Invoices */}
+            {/* Invoices - unchanged ... */}
             <Card className="shadow-card">
                 <CardHeader>
                     <CardTitle>Invoice History</CardTitle>

@@ -1,11 +1,9 @@
 import { useAppBridge } from '@shopify/app-bridge-react';
-// import { getSessionToken } from '@shopify/app-bridge-utils';
 import { useMemo } from 'react';
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 type Query = Record<string, unknown>;
 
-const baseRaw = import.meta.env.VITE_API_BASE_URL || "";
 
 type FetchOpts = {
     signal?: AbortSignal;
@@ -20,6 +18,7 @@ type ApiRequestInit = RequestInit & {
     params?: QueryParams;
 };
 
+const baseRaw = import.meta.env.VITE_API_BASE_URL || "";
 const BASE_URL = String(baseRaw).replace(/\/+$/, "");
 
 function trimSlashes(s: string) {
@@ -87,47 +86,67 @@ async function handleResponse<T>(res: Response, urlForError: string): Promise<T>
     return body as T;
 }
 
-async function get<T = unknown>(path: string, query?: Query, init?: RequestInit): Promise<T> {
+async function get<T = unknown>(path: string, query?: Record<string, unknown>, init?: RequestInit): Promise<T> {
     const url = joinUrl(BASE_URL, path) + toQueryString(query);
+
+    // FIX: Merge headers explicitly to prevent overwriting
+    const combinedHeaders = {
+        "Accept": "application/json",
+        "ngrok-skip-browser-warning": "true", // This bypasses the HTML warning page
+        ...(init?.headers ?? {})
+    };
+
     const res = await fetch(url, {
+        ...init, // Spread init first so we don't overwrite the headers below
         method: "GET",
-        headers: {
-            Accept: "application/json",
-            "ngrok-skip-browser-warning": "true",
-            ...(init?.headers ?? {}) },
+        headers: combinedHeaders,
         cache: "no-store",
-        ...init,
     });
+
     return handleResponse<T>(res, url);
 }
 
 async function post<T = unknown>(path: string, body?: unknown, init?: RequestInit): Promise<T> {
     const url = joinUrl(BASE_URL, path);
+
+    // FIX: Merge headers explicitly
+    const combinedHeaders = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "ngrok-skip-browser-warning": "true",
+        ...(init?.headers ?? {}),
+    };
+
     const res = await fetch(url, {
+        ...init, // Spread init first
         method: "POST",
-        headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true",
-            ...(init?.headers ?? {}),
-        },
+        headers: combinedHeaders,
         body: body === undefined ? undefined : JSON.stringify(body),
-        ...init,
     });
     return handleResponse<T>(res, url);
 }
 
 export function useAuthenticatedApi() {
-    const app = useAppBridge();
+    // In App Bridge 4, this returns the 'shopify' global instance
+    const shopify = useAppBridge();
 
     const authenticatedApi = useMemo(() => {
         const getAuthHeaders = async () => {
-            const token = await app.idToken();
-            return { 'Authorization': `Bearer ${token}` };
+            console.log("[Auth] Requesting session token..."); // LOG 1
+            try {
+                const token = await shopify.idToken();
+                console.log("[Auth] Token received!", token.substring(0, 10) + "..."); // LOG 2
+                return { 'Authorization': `Bearer ${token}` };
+            } catch (error) {
+                console.error("[Auth] Failed to get token:", error); // LOG 3
+                throw error;
+            }
         };
 
         return {
-            get: async <T = unknown>(path: string, query?: Query, init?: RequestInit): Promise<T> => {
+            get: async <T = unknown>(path: string, query?: Record<string, unknown>, init?: RequestInit): Promise<T> => {
+                console.log(`[API] GET Request to ${path}`); // LOG 4
+                console.log(window.location.search);
                 const authHeaders = await getAuthHeaders();
                 const newInit = {
                     ...init,
@@ -150,9 +169,8 @@ export function useAuthenticatedApi() {
                 return post<T>(path, body, newInit);
             },
         };
-    }, [app]);
+    }, [shopify]);
 
     return authenticatedApi;
 }
-
 export const api = { get, post };

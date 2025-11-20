@@ -172,6 +172,7 @@ const Overview = () => {
                     throw new Error("API Key could not be retrieved or is invalid.");
                 }
 
+
                 const params = {
                     from: fromISO,
                     to: toISO,
