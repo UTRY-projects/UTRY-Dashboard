@@ -9,11 +9,12 @@ export default defineConfig(({ mode }) => ({
   build: {
     sourcemap: true, // enable source maps for better stack traces in production
   },
-
+  // utry-projects.github.io/UTRY-Dashboard/", "utry-dev-api.mangopond-e2a8cd3b.northeurope.azurecontainerapps.io
+  // "https://strategy-example-alliance-analyses.trycloudflare.com", "jennet-sweeping-warthog.ngrok-free.app"
   server: {
     host: "::",
     port: 8081,
-    allowedHosts: ["jose-disposition-queen-flour.trycloudflare.com", "jennet-sweeping-warthog.ngrok-free.app"],
+    allowedHosts: ["utry-projects.github.io/UTRY-Dashboard/", "utry-dev-api.mangopond-e2a8cd3b.northeurope.azurecontainerapps.io"],
     hmr: {
       // --- CORRECTED ---
       // The host should be just the hostname, without the protocol or trailing slash.
@@ -23,7 +24,7 @@ export default defineConfig(({ mode }) => ({
     proxy: {
       // Forward API calls from the dev server to your backend
       "/api": {
-        target: "https://jennet-sweeping-warthog.ngrok-free.app", // Updated to ngrok URL
+        target: "utry-dev-api.mangopond-e2a8cd3b.northeurope.azurecontainerapps.io", // Updated to ngrok URL
         changeOrigin: true,
         secure: false,
         headers: {

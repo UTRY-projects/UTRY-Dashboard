@@ -24,7 +24,7 @@ interface DashboardSidebarProps {
 
 const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Virtual Try-On", url: "/vto", icon: Camera },
+  // { title: "Virtual Try-On", url: "/vto", icon: Camera },
   { title: "Virtual Dressing Room", url: "/vdr", icon: Shirt },
   { title: "Integrate with Shopify & Integration health", url: "/integration", icon: Link2 },
   { title: "Subscription & Billing", url: "/billing", icon: CreditCard },

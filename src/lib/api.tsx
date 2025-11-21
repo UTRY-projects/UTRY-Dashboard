@@ -17,8 +17,8 @@ type ApiRequestInit = RequestInit & {
     method?: HttpMethod;
     params?: QueryParams;
 };
-
-const baseRaw = import.meta.env.VITE_API_BASE_URL || "";
+// "jennet-sweeping-warthog.ngrok-free.app", "utry-dev-api.mangopond-e2a8cd3b.northeurope.azurecontainerapps.io
+const baseRaw = "https://jennet-sweeping-warthog.ngrok-free.app";
 const BASE_URL = String(baseRaw).replace(/\/+$/, "");
 
 function trimSlashes(s: string) {
@@ -77,9 +77,27 @@ function getMessageFromBody(body: unknown): string | undefined {
     return undefined;
 }
 
+export class AuthError extends Error {
+    constructor(public shop: string) {
+        super("Authentication required");
+        this.name = "AuthError";
+    }
+}
+
 async function handleResponse<T>(res: Response, urlForError: string): Promise<T> {
     const body = await parseJsonSafe(res);
+
     if (!res.ok) {
+        if (res.status === 401) {
+            console.warn("[Auth] 401 Detected. Throwing AuthError to trigger redirect...");
+            const params = new URLSearchParams(window.location.search);
+            const shop = params.get("shop");
+
+            if (shop) {
+                // Throw a specific error that the React Component can catch
+                throw new AuthError(shop);
+            }
+        }
         const msg = getMessageFromBody(body) ?? JSON.stringify(body);
         throw new Error(`${res.status} ${res.statusText} - ${urlForError} - ${msg}`);
     }
@@ -89,7 +107,8 @@ async function handleResponse<T>(res: Response, urlForError: string): Promise<T>
 async function get<T = unknown>(path: string, query?: Record<string, unknown>, init?: RequestInit): Promise<T> {
     const url = joinUrl(BASE_URL, path) + toQueryString(query);
 
-    // FIX: Merge headers explicitly to prevent overwriting
+    console.log("[API DEBUG] Sending Headers:", init?.headers);
+
     const combinedHeaders = {
         "Accept": "application/json",
         "ngrok-skip-browser-warning": "true", // This bypasses the HTML warning page
@@ -97,7 +116,7 @@ async function get<T = unknown>(path: string, query?: Record<string, unknown>, i
     };
 
     const res = await fetch(url, {
-        ...init, // Spread init first so we don't overwrite the headers below
+        ...init,
         method: "GET",
         headers: combinedHeaders,
         cache: "no-store",

@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, HashRouter, useSearchParams } from "react
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { DashboardLayout } from "./components/layout/DashboardLayout";
 import Overview from "@/pages/Overview";
-import VTO from "./pages/VTO";
+// import VTO from "./pages/VTO";
 import VDR from "./pages/VDR";
 import Integration from "./pages/Integration";
 import Billing from "./pages/Billing";
@@ -52,7 +52,7 @@ const AppContent = () => (
     <Routes>
         <Route element={<DashboardLayout />}>
             <Route path="/" element={<Overview />} />
-            <Route path="/vto" element={<VTO />} />
+            {/*<Route path="/vto" element={<VTO />} />*/}
             <Route path="/vdr" element={<VDR />} />
             <Route path="/integration" element={<Integration />} />
             <Route path="/billing" element={<Billing />} />

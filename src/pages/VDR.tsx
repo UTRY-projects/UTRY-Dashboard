@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Send, Eye, TrendingUp, TrendingDown, Users } from "lucide-react";
+import {Send, Eye, TrendingUp, TrendingDown, Users, Package} from "lucide-react";
 import {
   LineChart,
   Line,
@@ -20,8 +20,17 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import {useEffect, useMemo, useState} from "react";
+import {api} from "@/lib/api.tsx";
+import {useOutletContext} from "react-router-dom";
+import {useAppBridge} from "@shopify/app-bridge-react";
+import {DateRange} from "react-day-picker";
 
 
+interface ContextType {
+  productFilter: "all" | "vto" | "vdr";
+  dateRange: DateRange | undefined;
+}
 
 const mockChartData = [
   { date: "Mon", avatarTryOns: 320 },
@@ -63,7 +72,117 @@ const mockVDRProducts = [
   },
 ];
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function toFiniteNumber(input: unknown): number {
+  if (typeof input === "number") {
+    return Number.isFinite(input) ? input : 0;
+  }
+  if (typeof input === "string") {
+    const n = Number(input);
+    return Number.isFinite(n) ? n : 0;
+  }
+  if (isRecord(input)) {
+    if ("data" in input) return toFiniteNumber((input as { data: unknown }).data);
+    if ("total" in input) return toFiniteNumber((input as { total: unknown }).total);
+    if ("count" in input) return toFiniteNumber((input as { count: unknown }).count);
+  }
+  return 0;
+}
 const VDR = () => {
+  const {productFilter, dateRange} = useOutletContext<ContextType>();
+  const app = useAppBridge();
+
+  const [totalTries, setTotalTries] = useState<number>(0);
+  const [activeProducts, setActiveProducts] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fromISO = useMemo(
+      () => (dateRange?.from ? dateRange.from.toISOString() : undefined),
+      [dateRange?.from]
+  );
+
+
+  const toISO = useMemo(
+      () => (dateRange?.to ? dateRange.to.toISOString() : undefined),
+      [dateRange?.to]
+  );
+  useEffect(() => {
+    if (!fromISO || !toISO) {
+      console.warn("Skipping fetch: missing date range");
+      setTotalTries(0);
+      return;
+    }
+
+    const controller = new AbortController();
+
+    const fetchData = async () => {
+
+
+      setLoading(true);
+      setError(null);
+      try {
+        const ShopParams = new URLSearchParams(window.location.search);
+        const shopName = ShopParams.get('shop').replace(/\.myshopify\.com$/, "");
+        console.log(`Fetching API key for shop: ${shopName}`);
+        const apiKey = await api.get<string>(
+            "/api/Dashboard/GetStoreApiKey",
+            { storeName: shopName },
+            { signal: controller.signal, }
+        );
+        console.log(shopName, apiKey);
+        if (!apiKey || typeof apiKey !== "string") {
+          throw new Error("API Key could not be retrieved or is invalid.");
+        }
+
+
+        const params = {
+          from: fromISO,
+          to: toISO,
+          api_key: apiKey,
+          productFilter: productFilter === "all" ? undefined : productFilter,
+        };
+
+        console.log("Fetching from backend with params:", params);
+
+        const data = await api.get<unknown>("/api/Dashboard/GetCalculations", params, {
+          signal: controller.signal,
+        });
+
+        const activeCount = await api.get<number>(
+            "/api/Dashboard/GetActiveProductsCount",
+            { api_key: apiKey },
+            { signal: controller.signal }
+        );
+        setActiveProducts(typeof activeCount === "number" ? activeCount : 0);
+
+        console.log("Data received:", data);
+
+        const total = toFiniteNumber(data);
+        console.log("Total tries:", total);
+        setTotalTries(total);
+
+      } catch (e) {
+        if ((e as Error).name !== "AbortError") {
+          setError((e as Error).message);
+          console.error("Fetch failed:", e);
+          setTotalTries(0);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    return () => controller.abort();
+  }, [fromISO, toISO, productFilter, app.origin]);
+
+
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -74,28 +193,23 @@ const VDR = () => {
             3D garment analytics and avatar engagement metrics
           </p>
         </div>
-        <Button className="bg-accent hover:bg-accent/90 text-accent-foreground">
-          <Send className="h-4 w-4 mr-2" />
-          Send UTRY New Design
-        </Button>
       </div>
 
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
         <MetricCard
-          title="Total VDR Try-Ons"
-          value="3,996"
-          subtitle="Selected period"
-          icon={Eye}
-          trend={{ value: 8.2, isPositive: true }}
-          tooltip="Total number of 3D garment try-ons using virtual avatars in the selected date range"
+            title="Total Try-Ons"
+            value={loading ? "..." : totalTries.toLocaleString()}
+            subtitle="Selected period"
+            icon={Eye}
+            tooltip="Total number of virtual try-on sessions across all products in the selected date range"
         />
         <MetricCard
-          title="Unique Users"
-          value="681"
-          subtitle="Selected period"
-          icon={Users}
-          tooltip="Number of distinct users who used VDR in the selected date range"
+            title="Active Products"
+            value={loading ? "..." : activeProducts.toLocaleString()}
+            subtitle="VTO + VDR combined"
+            icon={Package}
+            tooltip="Total number of products currently available for virtual try-on across both VTO and VDR"
         />
       </div>
 

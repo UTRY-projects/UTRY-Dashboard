@@ -1,107 +1,31 @@
 import { useEffect, useMemo, useState } from "react";
-import {useOutletContext} from "react-router-dom";
-import {MetricCard} from "@/components/dashboard/MetricCard";
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Badge} from "@/components/ui/badge";
+import { useOutletContext } from "react-router-dom";
+import { MetricCard } from "@/components/dashboard/MetricCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppBridge } from "@shopify/app-bridge-react";
+import { Eye, Package, Loader2 } from "lucide-react"; // Added Loader2
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import {Eye, TrendingUp, TrendingDown, Package} from "lucide-react";
-import {
-    LineChart,
-    Line,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Tooltip,
-    ResponsiveContainer,
+    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
-import {DateRange} from "react-day-picker";
-import {api} from "@/lib/api";
+import { DateRange } from "react-day-picker";
+import { useAuthenticatedApi, AuthError } from "@/lib/api"; // Import AuthError
+import { startOfMonth, format } from "date-fns";
 
+// ... (Keep ContextType, getCurrentMonthRange, isRecord, toFiniteNumber, DailyUsage helpers) ...
 interface ContextType {
     productFilter: "all" | "vto" | "vdr";
     dateRange: DateRange | undefined;
 }
-
-type CalculationResponse = {
-    total: number;
-}
-
-const mockChartData = [
-    {date: "Week 1", tryOns: 2400},
-    {date: "Week 2", tryOns: 3200},
-    {date: "Week 3", tryOns: 2800},
-    {date: "Week 4", tryOns: 4100},
-];
-
-const mockProducts = [
-    {
-        id: 1,
-        name: "Summer Dress Blue",
-        type: "VTO",
-        tryOns: 1234,
-        conversionRate: 32.4,
-        image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=100&h=100&fit=crop",
-    },
-    {
-        id: 2,
-        name: "Classic Blazer",
-        type: "VDR",
-        tryOns: 987,
-        conversionRate: 28.1,
-        image: "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=100&h=100&fit=crop",
-    },
-    {
-        id: 3,
-        name: "Denim Jeans",
-        type: "VTO",
-        tryOns: 856,
-        conversionRate: 24.7,
-        image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=100&h=100&fit=crop",
-    },
-    {
-        id: 4,
-        name: "White Sneakers",
-        type: "VDR",
-        tryOns: 743,
-        conversionRate: 35.2,
-        image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=100&h=100&fit=crop",
-    },
-    {
-        id: 5,
-        name: "Leather Jacket",
-        type: "VTO",
-        tryOns: 621,
-        conversionRate: 29.8,
-        image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=100&h=100&fit=crop",
-    },
-];
-
-type OverviewResponse = {
-    metrics: { totalTryOns: number; }
-}
-
-
-
+const getCurrentMonthRange = (): DateRange => {
+    const today = new Date();
+    return { from: startOfMonth(today), to: today };
+};
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
 }
-
 function toFiniteNumber(input: unknown): number {
-    if (typeof input === "number") {
-        return Number.isFinite(input) ? input : 0;
-    }
-    if (typeof input === "string") {
-        const n = Number(input);
-        return Number.isFinite(n) ? n : 0;
-    }
+    if (typeof input === "number") return Number.isFinite(input) ? input : 0;
+    if (typeof input === "string") { const n = Number(input); return Number.isFinite(n) ? n : 0; }
     if (isRecord(input)) {
         if ("data" in input) return toFiniteNumber((input as { data: unknown }).data);
         if ("total" in input) return toFiniteNumber((input as { total: unknown }).total);
@@ -109,136 +33,165 @@ function toFiniteNumber(input: unknown): number {
     }
     return 0;
 }
+type DailyUsage = { date: string; amount: number; }
+// -----------------------------------------------------------------------------
 
 const Overview = () => {
-    const {productFilter, dateRange} = useOutletContext<ContextType>();
+    const { productFilter, dateRange } = useOutletContext<ContextType>();
     const app = useAppBridge();
 
+    const authenticatedApi = useAuthenticatedApi();
+
+    const finalDateRange = useMemo(() => {
+        return dateRange?.from ? dateRange : getCurrentMonthRange();
+    }, [dateRange]);
+
+    const dateLabel = useMemo(() => {
+        if (finalDateRange?.from) {
+            return format(finalDateRange.from, "MMMM yyyy");
+        }
+        return "Current Month";
+    }, [finalDateRange]);
+
     const [totalTries, setTotalTries] = useState<number>(0);
+    const [activeProducts, setActiveProducts] = useState<number>(0);
+    const [chartData, setChartData] = useState<{ date: string; tryOns: number }[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
-    const fromISO = useMemo(
-        () => (dateRange?.from ? dateRange.from.toISOString() : undefined),
-        [dateRange?.from]
-    );
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-        <MetricCard
-          title="Total Try-Ons"
-          value="12,543"
-          subtitle="Selected period"
-          icon={Eye}
-          tooltip="Total number of virtual try-on sessions across all products in the selected date range"
-        />
-        <MetricCard
-          title="Active Products"
-          value="247"
-          subtitle="VTO + VDR combined"
-          icon={Package}
-          tooltip="Total number of products currently available for virtual try-on across both VTO and VDR"
-        />
-      </div>
+    // State to track if we are currently redirecting to auth
+    const [isRedirecting, setIsRedirecting] = useState(false);
 
-    const toISO = useMemo(
-        () => (dateRange?.to ? dateRange.to.toISOString() : undefined),
-        [dateRange?.to]
-    );
+    const fromISO = useMemo(() => (finalDateRange?.from ? finalDateRange.from.toISOString() : undefined), [finalDateRange]);
+    const toISO = useMemo(() => (finalDateRange?.to ? finalDateRange.to.toISOString() : undefined), [finalDateRange]);
 
     useEffect(() => {
-        if (!fromISO || !toISO) {
-            console.warn("Skipping fetch: missing date range");
-            setTotalTries(0);
-            return;
-        }
+        if (!fromISO || !toISO) return;
 
         const controller = new AbortController();
 
         const fetchData = async () => {
-
+            const { from, to } = finalDateRange;
+            if (!from || !to) return;
 
             setLoading(true);
-            setError(null);
             try {
-                const ShopParams = new URLSearchParams(window.location.search);
-                const shopName = ShopParams.get('shop').replace(/\.myshopify\.com$/, "");
-                console.log(`Fetching API key for shop: ${shopName}`);
-                const apiKey = await api.get<string>(
-                    "/api/Dashboard/GetStoreApiKey",
-                    { storeName: shopName },
-                    { signal: controller.signal, }
-                );
-                if (!apiKey || typeof apiKey !== "string") {
-                    throw new Error("API Key could not be retrieved or is invalid.");
-                }
-
+                const endDateExclusive = new Date(to);
+                endDateExclusive.setDate(endDateExclusive.getDate() + 1);
 
                 const params = {
-                    from: fromISO,
-                    to: toISO,
-                    api_key: apiKey,
-                    productFilter: productFilter === "all" ? undefined : productFilter,
+                    from: from.toISOString(),
+                    to: endDateExclusive.toISOString(),
                 };
 
-                console.log("Fetching from backend with params:", params);
-
-                const data = await api.get<unknown>("/api/Dashboard/GetCalculations", params, {
+                const calcData = await authenticatedApi.get<unknown>("/api/Dashboard/GetCalculations", params, {
                     signal: controller.signal,
                 });
+                setTotalTries(toFiniteNumber(calcData));
 
-                console.log("Data received:", data);
+                const activeCount = await authenticatedApi.get<number>(
+                    "/api/Dashboard/GetActiveProductsCount",
+                    undefined,
+                    { signal: controller.signal }
+                );
+                setActiveProducts(typeof activeCount === "number" ? activeCount : 0);
 
-                const total = toFiniteNumber(data);
-                console.log("Total tries:", total);
-                setTotalTries(total);
+                const startOfSelectedMonth = from.toISOString();
+                const usageData = await authenticatedApi.get<DailyUsage[]>(
+                    "/api/Dashboard/GetTriesPerMonth",
+                    { date: startOfSelectedMonth },
+                    { signal: controller.signal }
+                );
+
+                if (Array.isArray(usageData)) {
+                    const formattedData = usageData.map((dayItem) => ({
+                        date: format(new Date(dayItem.date), "MMM dd"),
+                        tryOns: dayItem.amount || 0,
+                    }));
+                    setChartData(formattedData);
+                } else {
+                    setChartData([]);
+                }
 
             } catch (e) {
+                // --- AUTOMATIC REDIRECT LOGIC ---
+                if (e instanceof AuthError) {
+                    console.log("[Auth] Session missing. Automatically redirecting to:", e.shop);
+                    setIsRedirecting(true);
+
+                    // Construct the install URL
+                    // IMPORTANT: Ensure this matches your Backend URL from appsettings.json
+                    const authUrl = `https://utry-dev-api.mangopond-e2a8cd3b.northeurope.azurecontainerapps.io/api/auth/initiate?shop=${e.shop}`;
+
+                    // Use window.open with '_top'.
+                    // The App Bridge script (loaded in index.html) intercepts this
+                    // and converts it into a safe Shopify Redirect message.
+                    window.open(authUrl, "_top");
+
+                    return; // Stop execution
+                }
+                // --------------------------------
+
                 if ((e as Error).name !== "AbortError") {
-                    setError((e as Error).message);
                     console.error("Fetch failed:", e);
-                    setTotalTries(0);
                 }
             } finally {
-                setLoading(false);
+                // Only stop loading if we aren't redirecting
+                // This keeps the UI "busy" while the page reloads
+                if (!isRedirecting) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchData();
-
         return () => controller.abort();
-    }, [fromISO, toISO, productFilter, app.origin]);
+    }, [fromISO, toISO, app.origin, authenticatedApi]);
 
-      {/* Top Products Table */}
+    // --- NEW: Loading State for Redirect ---
+    if (isRedirecting) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[60vh] space-y-4">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <h2 className="text-xl font-semibold">Connecting to Store...</h2>
+                <p className="text-muted-foreground">Please wait while we authenticate your session.</p>
+            </div>
+        );
+    }
+    // ---------------------------------------
+
     return (
         <div className="space-y-6">
-            {/* Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                 <MetricCard
                     title="Total Try-Ons"
                     value={loading ? "..." : totalTries.toLocaleString()}
-                    subtitle="Selected period"
+                    subtitle={dateLabel}
                     icon={Eye}
                     tooltip="Total number of virtual try-on sessions across all products in the selected date range"
                 />
                 <MetricCard
                     title="Active Products"
-                    value="247"
-                    subtitle="VTO + VDR combined"
+                    value={loading ? "..." : activeProducts.toLocaleString()}
+                    subtitle={dateLabel}
                     icon={Package}
                     tooltip="Total number of products currently available for virtual try-on across both VTO and VDR"
                 />
             </div>
-
             {/* Try-On Trends Chart */}
             <Card className="shadow-card">
                 <CardHeader>
-                    <CardTitle>Try-On Trends</CardTitle>
+                    <CardTitle>Daily Usage</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
-                        <LineChart data={mockChartData}>
+                        <LineChart data={chartData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                            <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                            <XAxis
+                                dataKey="date"
+                                stroke="hsl(var(--muted-foreground))"
+                                fontSize={12}
+                                tickMargin={10}
+                            />
                             <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
                             <Tooltip
                                 contentStyle={{
@@ -247,50 +200,19 @@ const Overview = () => {
                                     borderRadius: "8px",
                                 }}
                             />
-                            <Line type="monotone" dataKey="tryOns" stroke="hsl(var(--primary))" strokeWidth={2} />
+                            <Line
+                                type="monotone"
+                                dataKey="tryOns"
+                                stroke="hsl(var(--primary))"
+                                strokeWidth={2}
+                                dot={false}
+                            />
                         </LineChart>
                     </ResponsiveContainer>
                 </CardContent>
             </Card>
-
-            {/* Top Products Table */}
-            <Card className="shadow-card">
-                <CardHeader>
-                    <CardTitle>Top Performing Products</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Product</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Try-Ons</TableHead>
-                                <TableHead className="text-right">Conversion</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {mockProducts.map((product) => (
-                                <TableRow key={product.id}>
-                                    <TableCell className="flex items-center gap-3">
-                                        <img src={product.image} alt={product.name} className="h-10 w-10 rounded-md object-cover" />
-                                        <span className="font-medium">{product.name}</span>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant={product.type === "VTO" ? "default" : "secondary"}>
-                                            {product.type}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell>{product.tryOns.toLocaleString()}</TableCell>
-                                    <TableCell className="text-right">{product.conversionRate}%</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
         </div>
     );
-
 };
 
 export default Overview;
