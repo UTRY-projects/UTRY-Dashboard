@@ -14,7 +14,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8081,
-    allowedHosts: ["utry-projects.github.io/UTRY-Dashboard/", "utry-dev-api.mangopond-e2a8cd3b.northeurope.azurecontainerapps.io"],
+    allowedHosts: ["utry-projects.github.io/UTRY-Dashboard/", "utry-dev-api.mangopond-e2a8cd3b.northeurope.azurecontainerapps.io", "nonimputatively-uncamphorated-shanna.ngrok-free.dev"],
     hmr: {
       // --- CORRECTED ---
       // The host should be just the hostname, without the protocol or trailing slash.
