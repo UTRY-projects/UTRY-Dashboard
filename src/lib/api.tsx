@@ -17,8 +17,9 @@ type ApiRequestInit = RequestInit & {
     method?: HttpMethod;
     params?: QueryParams;
 };
+const AZURE_API_URL = "https://jennet-sweeping-warthog.ngrok-free.app";
 // "jennet-sweeping-warthog.ngrok-free.app", "utry-dev-api.mangopond-e2a8cd3b.northeurope.azurecontainerapps.io
-const baseRaw = "https://jennet-sweeping-warthog.ngrok-free.app";
+const baseRaw = AZURE_API_URL;
 const BASE_URL = String(baseRaw).replace(/\/+$/, "");
 
 function trimSlashes(s: string) {
@@ -154,6 +155,12 @@ export function useAuthenticatedApi() {
             console.log("[Auth] Requesting session token..."); // LOG 1
             try {
                 const token = await shopify.idToken();
+
+                if (!token) {
+                    console.error("[Auth] Token is null or empty!");
+                    throw new Error("Failed to generate token");
+                }
+
                 console.log("[Auth] Token received!", token.substring(0, 10) + "..."); // LOG 2
                 return { 'Authorization': `Bearer ${token}` };
             } catch (error) {

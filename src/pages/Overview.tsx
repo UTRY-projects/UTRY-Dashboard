@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import {useOutletContext, useSearchParams} from "react-router-dom";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAppBridge } from "@shopify/app-bridge-react";
-import { Eye, Package, Loader2 } from "lucide-react"; // Added Loader2
+import { createApp } from "@shopify/app-bridge";
+import { Redirect } from '@shopify/app-bridge/actions';
+import { Eye, Package, Loader2 } from "lucide-react";
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import { DateRange } from "react-day-picker";
-import { useAuthenticatedApi, AuthError } from "@/lib/api"; // Import AuthError
+import { useAuthenticatedApi, AuthError } from "@/lib/api";
 import { startOfMonth, format } from "date-fns";
 
 // ... (Keep ContextType, getCurrentMonthRange, isRecord, toFiniteNumber, DailyUsage helpers) ...
@@ -38,7 +40,7 @@ type DailyUsage = { date: string; amount: number; }
 
 const Overview = () => {
     const { productFilter, dateRange } = useOutletContext<ContextType>();
-    const app = useAppBridge();
+    const { app, shop } = useOutletContext<{ app: ReturnType<typeof createApp>, shop: string | null }>();
 
     const authenticatedApi = useAuthenticatedApi();
 
@@ -65,6 +67,35 @@ const Overview = () => {
     const toISO = useMemo(() => (finalDateRange?.to ? finalDateRange.to.toISOString() : undefined), [finalDateRange]);
 
     useEffect(() => {
+        const checkForPendingCharges = async () => {
+            // 3. The safety check now uses both variables from the same source.
+            if (!app || !shop) {
+                console.log("Billing check skipped: App or shop not ready yet.");
+                return;
+            }
+
+            try {
+                // 4. The API call remains the same and will now work.
+                const data = await authenticatedApi.get<{ confirmationUrl?: string }>(
+                    "/api/billing/pending-charge",
+                    { shop: shop }
+                );
+
+                if (data && data.confirmationUrl) {
+                    console.log("[Billing] Pending charge found. Redirecting...");
+                    const redirect = Redirect.create(app);
+                    redirect.dispatch(Redirect.Action.REMOTE, data.confirmationUrl);
+                }
+            } catch (error) {
+                console.error("Could not check for pending charges:", error);
+            }
+        };
+
+        checkForPendingCharges();
+    }, [authenticatedApi, app, shop]);
+
+    useEffect(() => {
+
         if (!fromISO || !toISO) return;
 
         const controller = new AbortController();
@@ -120,7 +151,7 @@ const Overview = () => {
 
                     // Construct the install URL
                     // IMPORTANT: Ensure this matches your Backend URL from appsettings.json
-                    const authUrl = `https://utry-dev-api.mangopond-e2a8cd3b.northeurope.azurecontainerapps.io/api/auth/initiate?shop=${e.shop}`;
+                    const authUrl = `https://jennet-sweeping-warthog.ngrok-free.app/api/auth/initiate?shop=${e.shop}`;
 
                     // Use window.open with '_top'.
                     // The App Bridge script (loaded in index.html) intercepts this
@@ -145,7 +176,7 @@ const Overview = () => {
 
         fetchData();
         return () => controller.abort();
-    }, [fromISO, toISO, app.origin, authenticatedApi]);
+    }, [fromISO, toISO, app, authenticatedApi]);
 
     // --- NEW: Loading State for Redirect ---
     if (isRedirecting) {

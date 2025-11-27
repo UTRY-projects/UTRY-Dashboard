@@ -86,7 +86,7 @@ const Billing = () => {
             try {
                 // Call your new endpoint
                 const data = await authenticatedApi.get<PlanDetails>(
-                    `/api/billing/current-plan?shop=${shop}`
+                    `/api/store/GetAllStoresWithPlan`
                 );
                 // Assuming your api wrapper returns the json body directly
                 setPlanDetails(data);
