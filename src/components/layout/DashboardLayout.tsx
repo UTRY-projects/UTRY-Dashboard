@@ -5,12 +5,14 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "./DashboardSidebar";
 import { DashboardHeader } from "./DashboardHeader";
 import { DateRange } from "react-day-picker";
+import { startOfMonth, endOfMonth } from "date-fns";
+
 type AppBridgeInstance = ReturnType<typeof createApp>;
 export const DashboardLayout = ({ app, shop }: { app: AppBridgeInstance, shop: string | null }) => {
   const [productFilter, setProductFilter] = useState<"all" | "vto" | "vdr">("all");
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
-    from: new Date(new Date().setDate(new Date().getDate() - 30)),
-    to: new Date(),
+    from: startOfMonth(new Date()),
+    to: endOfMonth(new Date()),
   });
 
   return (

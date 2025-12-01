@@ -212,40 +212,6 @@ const VDR = () => {
             tooltip="Total number of products currently available for virtual try-on across both VTO and VDR"
         />
       </div>
-
-      {/* Chart */}
-      <Card className="shadow-card">
-        <CardHeader>
-          <CardTitle>Avatar Try-Ons Over Time</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={mockChartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis
-                dataKey="date"
-                stroke="hsl(var(--muted-foreground))"
-                fontSize={12}
-              />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "8px",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="avatarTryOns"
-                stroke="hsl(var(--accent))"
-                strokeWidth={3}
-                dot={{ fill: "hsl(var(--accent))", r: 4 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
     </div>
   );
 };

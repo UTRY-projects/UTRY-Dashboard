@@ -129,7 +129,6 @@ async function get<T = unknown>(path: string, query?: Record<string, unknown>, i
 async function post<T = unknown>(path: string, body?: unknown, init?: RequestInit): Promise<T> {
     const url = joinUrl(BASE_URL, path);
 
-    // FIX: Merge headers explicitly
     const combinedHeaders = {
         "Accept": "application/json",
         "Content-Type": "application/json",
@@ -138,11 +137,29 @@ async function post<T = unknown>(path: string, body?: unknown, init?: RequestIni
     };
 
     const res = await fetch(url, {
-        ...init, // Spread init first
+        ...init,
         method: "POST",
         headers: combinedHeaders,
         body: body === undefined ? undefined : JSON.stringify(body),
     });
+    return handleResponse<T>(res, url);
+}
+
+async function del<T = unknown>(path: string, query?: Record<string, unknown>, init?: RequestInit): Promise<T> {
+    const url = joinUrl(BASE_URL, path) + toQueryString(query);
+
+    const combinedHeaders = {
+        "Accept": "application/json",
+        "ngrok-skip-browser-warning": "true",
+        ...(init?.headers ?? {})
+    };
+
+    const res = await fetch(url, {
+        ...init,
+        method: "DELETE",
+        headers: combinedHeaders,
+    });
+
     return handleResponse<T>(res, url);
 }
 
@@ -194,9 +211,20 @@ export function useAuthenticatedApi() {
                 };
                 return post<T>(path, body, newInit);
             },
+            delete: async <T = unknown>(path: string, query?: Record<string, unknown>, init?: RequestInit): Promise<T> => {
+                const authHeaders = await getAuthHeaders();
+                const newInit = {
+                    ...init,
+                    headers: {
+                        ...init?.headers,
+                        ...authHeaders,
+                    },
+                };
+                return del<T>(path, query, newInit);
+            },
         };
     }, [shopify]);
 
     return authenticatedApi;
 }
-export const api = { get, post };
+export const api = { get, post, delete: del };

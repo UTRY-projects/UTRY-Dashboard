@@ -1,93 +1,61 @@
-import React, { useMemo, useEffect } from "react";
+import React from "react";
 import createApp from "@shopify/app-bridge";
 import { Redirect } from "@shopify/app-bridge/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { useSearchParams } from "react-router-dom";
+import { useOutletContext } from "react-router-dom";
 
 const apiKey = "6feca39509df11b363bb0a7300580b2f";
 const blockHandle = "utry-button";
 
-const errorLogs = [
-  {
-    id: 1,
-    timestamp: "2024-01-15 14:32:18",
-    description: "Product sync timeout for SKU-12345",
-    status: "resolved",
-  },
-  {
-    id: 2,
-    timestamp: "2024-01-15 12:10:05",
-    description: "API rate limit exceeded",
-    status: "resolved",
-  },
-];
-
 const Integration = () => {
+  // 1. Get the app instance and shop domain ONLY from the outlet context.
+  // This is the reliable source of truth passed down from App.tsx.
+  const { app, shop } = useOutletContext<{ app: ReturnType<typeof createApp>, shop: string | null }>();
 
-  const [searchParams] = useSearchParams();
-  const host = searchParams.get("host");
-  const shop = searchParams.get("shop");
-
-  // Always call useMemo, but only create the app if host is present
-  const app = React.useMemo(() => {
-    if (!host) return null;
-    return createApp({
-      apiKey,
-      host,
-      forceRedirect: true,
-    });
-  }, [host]);
-
-  // Early return for missing params, but after all hooks
-  if (!host || !shop) {
-    // Avoid infinite reloads by checking if we've already tried to reload
-    if (!window.location.search.includes("reloaded=1")) {
-      const params = new URLSearchParams(window.location.search);
-      params.set("reloaded", "1");
-      window.location.search = params.toString();
-      return null;
-    }
-    return (
-        <div>
-          <p>
-            Please reload the page to view the content(This is due to a shopify limitation that this page won't load propperly until you reload this page).
-          </p>
-          <p>
-            <strong>Press F5 or CTRL+R to reload the page.</strong>
-          </p>
-        </div>
-    );
-  }
+  // 2. DELETE the useSearchParams hook. It is the cause of the problem.
+  // const [searchParams] = useSearchParams();
+  // const host = searchParams.get("host");
 
   const handleIntegrateClick = () => {
-    if (!app) return;
+    // 3. The 'app' instance from the context is guaranteed to be ready here.
+    if (!app) {
+      console.error("App Bridge instance is not available.");
+      return;
+    }
     const url = `/admin/themes/current/editor?template=product&addAppBlockId=${apiKey}/${blockHandle}&target=sectionId:main`;
     const redirect = Redirect.create(app);
     redirect.dispatch(Redirect.Action.ADMIN_PATH, url);
   };
 
+  // 4. We no longer need the complex "Please reload" logic.
+  // If 'app' or 'shop' are not ready, the parent component will handle the error.
+  if (!app || !shop) {
+    // You can show a simple loading state or nothing at all,
+    // as the parent AppInitializer will show an error if config is truly missing.
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground">Integration Health</h1>
-        <p className="text-muted-foreground mt-1">
-          Monitor connection status and system health
-        </p>
-      </div>
+      <div className="space-y-6">
+        {/* Page Header */}
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Integration Health</h1>
+          <p className="text-muted-foreground mt-1">
+            Monitor connection status and system health
+          </p>
+        </div>
 
-      {/* Integration Status Card */}
-      <Card className="shadow-card grid grid-cols-3 md:grid-cols-1 gap-6">
-
-        <CardContent className="space-y-6">
-          <CardHeader>
-            <CardTitle>Integration</CardTitle>
-            <p>With the inegration the app will be embeded into product pages. Click button below to start Integration</p>
-            <Button onClick={handleIntegrateClick}> Integrate </Button>
-          </CardHeader>
-        </CardContent>
-      </Card>
+        {/* Integration Status Card */}
+        <Card className="shadow-card grid grid-cols-3 md:grid-cols-1 gap-6">
+          <CardContent className="space-y-6">
+            <CardHeader>
+              <CardTitle>Integration</CardTitle>
+              <p>With the inegration the app will be embeded into product pages. Click button below to start Integration</p>
+              <Button onClick={handleIntegrateClick}> Integrate </Button>
+            </CardHeader>
+          </CardContent>
+        </Card>
 
 
       {/* Integration Status Card */}
